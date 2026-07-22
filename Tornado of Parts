@@ -1,0 +1,330 @@
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+local targetParent = nil
+
+if localPlayer and localPlayer:FindFirstChild("PlayerGui") then
+    targetParent = localPlayer.PlayerGui
+else
+    local success, coreGui = pcall(function() return game:GetService("CoreGui") end)
+    if success and coreGui then
+        targetParent = coreGui
+    end
+end
+
+if not targetParent then return end
+
+local oldGui = targetParent:FindFirstChild("TornadoMenu_Premium")
+if oldGui then 
+    oldGui:Destroy() 
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TornadoMenu_Premium"
+ScreenGui.Parent = targetParent
+ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 270, 0, 460)
+MainFrame.Active = true
+
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
+local MainCorner = Instance.new("UICorner", MainFrame)
+MainCorner.CornerRadius = UDim.new(0, 12)
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+Title.BorderSizePixel = 0
+Title.Text = "  🌪️ CYBER TORNADO v5.8 [Ins]"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 13
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local TitleCorner = Instance.new("UICorner", Title)
+TitleCorner.CornerRadius = UDim.new(0, 12)
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Parent = MainFrame
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Text = "×"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 22
+CloseBtn.Font = Enum.Font.GothamBold
+
+local CloseCorner = Instance.new("UICorner", CloseBtn)
+CloseCorner.CornerRadius = UDim.new(0, 8)
+
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Parent = MainFrame
+ToggleBtn.Position = UDim2.new(0.05, 0, 0.11, 0)
+ToggleBtn.Size = UDim2.new(0.9, 0, 0, 35)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
+ToggleBtn.BorderSizePixel = 0
+ToggleBtn.Text = "ВКЛЮЧИТЬ ТОРНАДО"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 13
+ToggleBtn.Font = Enum.Font.GothamBold
+
+local ToggleCorner = Instance.new("UICorner", ToggleBtn)
+ToggleCorner.CornerRadius = UDim.new(0, 8)
+
+local settingsValues = {
+    Radius = 30,
+    Speed = 5,
+    Lift = 5,
+    Distance = 80,
+    TornadoHeight = 0,
+    Attraction = 4,
+    ScanDelay = 0.2,
+    LayerSpread = 3,
+    CameraFixActive = true
+}
+
+local function createSlider(text, settingName, positionY)
+    local SliderFrame = Instance.new("Frame", MainFrame)
+    SliderFrame.Size = UDim2.new(0.9, 0, 0, 26)
+    SliderFrame.Position = UDim2.new(0.05, 0, positionY, 0)
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    SliderFrame.BorderSizePixel = 0
+    local SFCorner = Instance.new("UICorner", SliderFrame)
+    SFCorner.CornerRadius = UDim.new(0, 6)
+    local Label = Instance.new("TextLabel", SliderFrame)
+    Label.Size = UDim2.new(0.65, 0, 1, 0)
+    Label.Position = UDim2.new(0.05, 0, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(180, 180, 190)
+    Label.TextSize = 11
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Font = Enum.Font.GothamSemibold
+    local Box = Instance.new("TextBox", SliderFrame)
+    Box.Size = UDim2.new(0.25, 0, 0.75, 0)
+    Box.Position = UDim2.new(0.7, 0, 0.125, 0)
+    Box.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    Box.BorderSizePixel = 0
+    Box.Text = tostring(settingsValues[settingName])
+    Box.TextColor3 = Color3.fromRGB(0, 255, 180)
+    Box.TextSize = 11
+    Box.Font = Enum.Font.GothamBold
+    local BoxCorner = Instance.new("UICorner", Box)
+    BoxCorner.CornerRadius = UDim.new(0, 4)
+    Box.FocusLost:Connect(function()
+        local num = tonumber(Box.Text)
+        if num then 
+            settingsValues[settingName] = num 
+        else 
+            Box.Text = tostring(settingsValues[settingName]) 
+        end
+    end)
+end
+
+createSlider("Радиус воронки:", "Radius", 0.21)
+createSlider("Скорость вращения:", "Speed", 0.28)
+createSlider("Высота подъема:", "Lift", 0.35)
+createSlider("Дистанция захвата:", "Distance", 0.42)
+createSlider("Высота центра:", "TornadoHeight", 0.49)
+createSlider("Сила затягивания:", "Attraction", 0.56)
+createSlider("Задержка скана (сек):", "ScanDelay", 0.63)
+createSlider("Разброс слоёв:", "LayerSpread", 0.70)
+local CamFixBtn = Instance.new("TextButton")
+CamFixBtn.Name = "CamFixBtn"
+CamFixBtn.Parent = MainFrame
+CamFixBtn.Position = UDim2.new(0.05, 0, 0.78, 0)
+CamFixBtn.Size = UDim2.new(0.9, 0, 0, 34)
+CamFixBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+CamFixBtn.BorderSizePixel = 0
+CamFixBtn.Text = "ФИКС КАМЕРЫ (INVISICAM): ON"
+CamFixBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CamFixBtn.TextSize = 11
+CamFixBtn.Font = Enum.Font.GothamBold
+
+local CamCorner = Instance.new("UICorner", CamFixBtn)
+CamCorner.CornerRadius = UDim.new(0, 8)
+
+local Footnote = Instance.new("TextLabel", MainFrame)
+Footnote.Size = UDim2.new(1, 0, 0, 20)
+Footnote.Position = UDim2.new(0, 0, 0.92, 0)
+Footnote.BackgroundTransparency = 1
+Footnote.Text = "Нажми [Insert], чтобы скрыть/открыть меню"
+Footnote.TextColor3 = Color3.fromRGB(120, 120, 140)
+Footnote.TextSize = 10
+Footnote.Font = Enum.Font.GothamMedium
+
+local RunService = game:GetService("RunService")
+local isTornadoActive = false
+local tornadoConnection = nil
+local activeParts = {}
+local lastScanTime = 0
+
+local function updateCameraMode()
+    pcall(function()
+        if isTornadoActive and settingsValues.CameraFixActive then
+            localPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam
+        else
+            localPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Zoom
+        end
+    end)
+end
+
+local function cleanPart(part)
+    if part then
+        local lv = part:FindFirstChild("TornadoForce")
+        local att = part:FindFirstChild("TornadoAttachment")
+        if lv then pcall(function() lv:Destroy() end) end
+        if att then pcall(function() att:Destroy() end) end
+    end
+end
+
+local function startTornado()
+    updateCameraMode()
+    tornadoConnection = RunService.Heartbeat:Connect(function()
+        local character = localPlayer.Character
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        if not rootPart then return end
+        local myPos = rootPart.Position
+        local currentTime = tick()
+        if currentTime - lastScanTime > settingsValues.ScanDelay then
+            lastScanTime = currentTime
+            activeParts = {}
+            for _, part in ipairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") and not part.Anchored and not part:IsDescendantOf(character) then
+                    local distance = (part.Position - myPos).Magnitude
+                    if distance <= settingsValues.Distance then
+                        table.insert(activeParts, part)
+                    else
+                        cleanPart(part)
+                    end
+                end
+            end
+        end
+        for i, part in ipairs(activeParts) do
+            if part and part.Parent then
+                local attachment = part:FindFirstChild("TornadoAttachment")
+                if not attachment then
+                    pcall(function()
+                        attachment = Instance.new("Attachment")
+                        attachment.Name = "TornadoAttachment"
+                        attachment.Parent = part
+                    end)
+                end
+                local lv = part:FindFirstChild("TornadoForce")
+                if not lv and attachment then
+                    pcall(function()
+                        lv = Instance.new("LinearVelocity")
+                        lv.Name = "TornadoForce"
+                        lv.MaxForce = 9e6
+                        lv.Attachment0 = attachment
+                        lv.RelativeTo = Enum.ActuatorRelativeTo.World
+                        lv.Parent = part
+                    end)
+                end
+                if lv then
+                    local angle = (currentTime * settingsValues.Speed) + (i * 0.5)
+                    local offsetX = math.sin(angle) * settingsValues.Radius
+                    local offsetZ = math.cos(angle) * settingsValues.Radius
+                    local layerOffset = (i % 10) * settingsValues.LayerSpread
+                    local waveEffect = math.sin(currentTime * 2 + i) * (settingsValues.Lift / 2)
+                    local offsetY = settingsValues.TornadoHeight + layerOffset + waveEffect
+                    local targetPosition = myPos + Vector3.new(offsetX, offsetY, offsetZ)
+                    pcall(function()
+                        lv.VectorVelocity = (targetPosition - part.Position) * settingsValues.Attraction
+                    end)
+                end
+            end
+        end
+    end)
+end
+
+local function stopTornado()
+    updateCameraMode()
+    if tornadoConnection then 
+        tornadoConnection:Disconnect()
+        tornadoConnection = nil 
+    end
+    for _, part in ipairs(activeParts) do
+        cleanPart(part)
+    end
+    activeParts = {}
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == Enum.KeyCode.Insert then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    isTornadoActive = not isTornadoActive
+    if isTornadoActive then
+        ToggleBtn.Text = "ВЫКЛЮЧИТЬ ТОРНАДО"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+        startTornado()
+    else
+        ToggleBtn.Text = "ВКЛЮЧИТЬ ТОРНАДО"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
+        stopTornado()
+    end
+end)
+
+CamFixBtn.MouseButton1Click:Connect(function()
+    settingsValues.CameraFixActive = not settingsValues.CameraFixActive
+    if settingsValues.CameraFixActive then
+        CamFixBtn.Text = "ФИКС КАМЕРЫ (INVISICAM): ON"
+        CamFixBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+    else
+        CamFixBtn.Text = "ФИКС КАМЕРЫ (INVISICAM): OFF"
+        CamFixBtn.BackgroundColor3 = Color3.fromRGB(50, 55, 65)
+    end
+    updateCameraMode()
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    stopTornado()
+    ScreenGui:Destroy()
+end)
