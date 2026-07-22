@@ -1,0 +1,225 @@
+--2
+local allButtons = {}
+
+local function CreateHubButton(text, parentPage, callback)
+    local Btn = Instance.new("TextButton", parentPage)
+    Btn.Size = UDim2.new(1, -5, 0, 36)
+    Btn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
+    Btn.Text = "  " .. text
+    Btn.TextColor3 = Color3.fromRGB(157, 78, 221)
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 11
+    Btn.TextXAlignment = Enum.TextXAlignment.Left
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+    local BtnStroke = Instance.new("UIStroke", Btn)
+    BtnStroke.Color = Color3.fromRGB(60, 45, 80)
+    
+    Btn.MouseEnter:Connect(function() Btn.BackgroundColor3 = Color3.fromRGB(35, 30, 55) end)
+    Btn.MouseLeave:Connect(function() Btn.BackgroundColor3 = Color3.fromRGB(25, 22, 38) end)
+    Btn.MouseButton1Click:Connect(callback)
+    
+    -- Регистрируем абсолютно все кнопки хаба для глобального поиска
+    table.insert(allButtons, {Instance = Btn, Name = text:lower(), Page = parentPage})
+    return Btn
+end
+
+-- СТРАНИЦА GAMES (Пока пустая, готова под игры)
+
+-- ВСЁ ПЕРЕНЕСЕНО НА СТРАНИЦУ OTHER
+CreateHubButton("Float", OtherPage, function() loadstring(readfile("MyHuB/Float.lua"))() end)
+CreateHubButton("x-yPos.lua", OtherPage, function() loadstring(readfile("MyHuB/x-yPos.lua"))() end)
+CreateHubButton("Gravitygun", OtherPage, function() loadstring(readfile("MyHuB/Gravitygun.lua"))() end)
+CreateHubButton("Tornado of Parts", OtherPage, function() loadstring(readfile("MyHuB/Tornado of Parts.lua"))() end)
+CreateHubButton("Text 2D", OtherPage, function() loadstring(readfile("MyHuB/v6 TextBlocks.lua"))() end)
+CreateHubButton("Tp Aura", OtherPage, function() loadstring(readfile("MyHuB/Tp Aura.lua"))() end)
+CreateHubButton("FreeCam", OtherPage, function() loadstring(readfile("MyHuB/FreeCam.lua"))() end)
+
+-- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
+local function switchTab(showGames)
+    GamesPage.Visible = showGames
+    OtherPage.Visible = not showGames
+    GamesTabBtn.TextColor3 = showGames and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
+    OtherTabBtn.TextColor3 = not showGames and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
+end
+switchTab(false) -- Стартуем сразу с заполненной вкладки Other
+
+GamesTabBtn.MouseButton1Click:Connect(function() switchTab(true) end)
+OtherTabBtn.MouseButton1Click:Connect(function() switchTab(false) end)
+
+-- ГЛОБАЛЬНЫЙ ФИЛЬТР ПОИСКА (Ищет сразу по всему хабу)
+SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local filter = SearchBox.Text:lower()
+    for _, btnData in ipairs(allButtons) do
+        if string.find(btnData.Name, filter) then
+            btnData.Instance.Visible = true
+        else
+            btnData.Instance.Visible = false
+        end
+    end
+end)
+
+-- Обновление прокрутки CanvasSize
+local function updateCanvas(page, layout)
+    page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+end
+GamesList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() updateCanvas(GamesPage, GamesList) end)
+OtherList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() updateCanvas(OtherPage, OtherList) end)
+
+-- ТРИГГЕР ИЗМЕНЕНИЯ РАЗМЕРА ЗА ПРАВЫЙ ВЕРХНИЙ УГОЛ (Там где значок ⤡)
+local ResizeTrigger = Instance.new("Frame", MainFrame)
+ResizeTrigger.Size = UDim2.new(0, 20, 0, 20)
+ResizeTrigger.Position = UDim2.new(1, -22, 0, 45)
+ResizeTrigger.BackgroundTransparency = 1
+ResizeTrigger.ZIndex = 10
+
+local resizing = false
+local resizeStartPos = Vector2.new()
+local startSize = Vector2.new()
+local startFramePos = Vector2.new()
+
+ResizeTrigger.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing = true
+        MainFrame.Draggable = false
+        resizeStartPos = input.Position
+        startSize = Vector2.new(MainFrame.AbsoluteSize.X, MainFrame.AbsoluteSize.Y)
+        startFramePos = Vector2.new(MainFrame.AbsolutePosition.X, MainFrame.AbsolutePosition.Y)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - resizeStartPos
+        local newWidth = math.max(280, startSize.X + delta.X)
+        local newHeight = math.max(180, startSize.Y - delta.Y)
+        
+        MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
+        MainFrame.Position = UDim2.new(0, startFramePos.X, 0, startFramePos.Y + delta.Y)
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if not resizing then MainFrame.Draggable = true end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing = false
+    end
+end)
+--2
+local allButtons = {}
+
+local function CreateHubButton(text, parentPage, callback)
+    local Btn = Instance.new("TextButton", parentPage)
+    Btn.Size = UDim2.new(1, -5, 0, 36)
+    Btn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
+    Btn.Text = "  " .. text
+    Btn.TextColor3 = Color3.fromRGB(157, 78, 221)
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 11
+    Btn.TextXAlignment = Enum.TextXAlignment.Left
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+    local BtnStroke = Instance.new("UIStroke", Btn)
+    BtnStroke.Color = Color3.fromRGB(60, 45, 80)
+    
+    Btn.MouseEnter:Connect(function() Btn.BackgroundColor3 = Color3.fromRGB(35, 30, 55) end)
+    Btn.MouseLeave:Connect(function() Btn.BackgroundColor3 = Color3.fromRGB(25, 22, 38) end)
+    Btn.MouseButton1Click:Connect(callback)
+    
+    -- Регистрируем абсолютно все кнопки хаба для глобального поиска
+    table.insert(allButtons, {Instance = Btn, Name = text:lower(), Page = parentPage})
+    return Btn
+end
+
+-- СТРАНИЦА GAMES (Пока пустая, готова под игры)
+CreateHubButton("nil", GamesPage, function() end)
+
+-- ВСЁ ПЕРЕНЕСЕНО НА СТРАНИЦУ OTHER
+CreateHubButton("Float", OtherPage, function() loadstring(readfile("MyHuB/Float.lua"))() end)
+CreateHubButton("x-yPos.lua", OtherPage, function() loadstring(readfile("MyHuB/x-yPos.lua"))() end)
+CreateHubButton("Gravitygun", OtherPage, function() loadstring(readfile("MyHuB/Gravitygun.lua"))() end)
+CreateHubButton("Tornado of Parts", OtherPage, function() loadstring(readfile("MyHuB/Tornado of Parts.lua"))() end)
+CreateHubButton("Text 2D", OtherPage, function() loadstring(readfile("MyHuB/v6 TextBlocks.lua"))() end)
+CreateHubButton("Tp Aura", OtherPage, function() loadstring(readfile("MyHuB/Tp Aura.lua"))() end)
+CreateHubButton("FreeCam", OtherPage, function() loadstring(readfile("MyHuB/FreeCam.lua"))() end)
+CreateHubButton("FlyTp", OtherPage, function() loadstring(readfile("MyHuB/flytp.lua"))() end)
+
+
+-- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
+local function switchTab(showGames)
+    GamesPage.Visible = showGames
+    OtherPage.Visible = not showGames
+    GamesTabBtn.TextColor3 = showGames and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
+    OtherTabBtn.TextColor3 = not showGames and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
+end
+switchTab(false) -- Стартуем сразу с заполненной вкладки Other
+
+GamesTabBtn.MouseButton1Click:Connect(function() switchTab(true) end)
+OtherTabBtn.MouseButton1Click:Connect(function() switchTab(false) end)
+
+-- ГЛОБАЛЬНЫЙ ФИЛЬТР ПОИСКА (Ищет сразу по всему хабу)
+SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local filter = SearchBox.Text:lower()
+    for _, btnData in ipairs(allButtons) do
+        if string.find(btnData.Name, filter) then
+            btnData.Instance.Visible = true
+        else
+            btnData.Instance.Visible = false
+        end
+    end
+end)
+
+-- Обновление прокрутки CanvasSize
+local function updateCanvas(page, layout)
+    page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+end
+GamesList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() updateCanvas(GamesPage, GamesList) end)
+OtherList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() updateCanvas(OtherPage, OtherList) end)
+
+-- ТРИГГЕР ИЗМЕНЕНИЯ РАЗМЕРА ЗА ПРАВЫЙ ВЕРХНИЙ УГОЛ (Там где значок ⤡)
+local ResizeTrigger = Instance.new("Frame", MainFrame)
+ResizeTrigger.Size = UDim2.new(0, 20, 0, 20)
+ResizeTrigger.Position = UDim2.new(1, -22, 0, 45)
+ResizeTrigger.BackgroundTransparency = 1
+ResizeTrigger.ZIndex = 10
+
+local resizing = false
+local resizeStartPos = Vector2.new()
+local startSize = Vector2.new()
+local startFramePos = Vector2.new()
+
+ResizeTrigger.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing = true
+        MainFrame.Draggable = false
+        resizeStartPos = input.Position
+        startSize = Vector2.new(MainFrame.AbsoluteSize.X, MainFrame.AbsoluteSize.Y)
+        startFramePos = Vector2.new(MainFrame.AbsolutePosition.X, MainFrame.AbsolutePosition.Y)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - resizeStartPos
+        local newWidth = math.max(280, startSize.X + delta.X)
+        local newHeight = math.max(180, startSize.Y - delta.Y)
+        
+        MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
+        MainFrame.Position = UDim2.new(0, startFramePos.X, 0, startFramePos.Y + delta.Y)
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if not resizing then MainFrame.Draggable = true end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        resizing = false
+    end
+end)
