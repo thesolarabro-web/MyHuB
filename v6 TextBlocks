@@ -1,0 +1,565 @@
+--1
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+local targetParent = nil
+if localPlayer and localPlayer:FindFirstChild("PlayerGui") then
+    targetParent = localPlayer.PlayerGui
+else
+    local success, coreGui = pcall(function() return game:GetService("CoreGui") end)
+    if success and coreGui then targetParent = coreGui end
+end
+if not targetParent then return end
+local oldGui = targetParent:FindFirstChild("RealMatrixConverter")
+if oldGui then oldGui:Destroy() end
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RealMatrixConverter"
+ScreenGui.Parent = targetParent
+ScreenGui.ResetOnSpawn = false
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+MainFrame.Size = UDim2.new(0, 310, 0, 640)
+MainFrame.Active = true
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then update(input) end
+end)
+local MainCorner = Instance.new("UICorner", MainFrame)
+MainCorner.CornerRadius = UDim.new(0, 12)
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+Title.BorderSizePixel = 0
+Title.Text = "   🧱 MATRIX CONVERTER v9.0"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+local TitleCorner = Instance.new("UICorner", Title)
+TitleCorner.CornerRadius = UDim.new(0, 12)
+local CloseBtn = Instance.new("TextButton", MainFrame)
+CloseBtn.Size = UDim2.new(0, 25, 0, 25)
+CloseBtn.Position = UDim2.new(1, -35, 0, 7)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
+CloseBtn.Text = "×"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 18
+CloseBtn.Font = Enum.Font.GothamBold
+local CloseCorner = Instance.new("UICorner", CloseBtn)
+CloseCorner.CornerRadius = UDim.new(0, 6)
+local ToggleBtn = Instance.new("TextButton", MainFrame)
+ToggleBtn.Position = UDim2.new(0.05, 0, 0.07, 0)
+ToggleBtn.Size = UDim2.new(0.9, 0, 0, 28)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
+ToggleBtn.Text = "ВКЛЮЧИТЬ ПРЕОБРАЗОВАТЕЛЬ"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 11
+ToggleBtn.Font = Enum.Font.GothamBold
+local ToggleCorner = Instance.new("UICorner", ToggleBtn)
+ToggleCorner.CornerRadius = UDim.new(0, 8)
+local AnchorBtn = Instance.new("TextButton", MainFrame)
+AnchorBtn.Position = UDim2.new(0.05, 0, 0.12, 0)
+AnchorBtn.Size = UDim2.new(0.9, 0, 0, 28)
+AnchorBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+AnchorBtn.Text = "🔒 ЗАФИКСИРОВАТЬ НА МЕСТЕ"
+AnchorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AnchorBtn.TextSize = 11
+AnchorBtn.Font = Enum.Font.GothamBold
+local AnchorCorner = Instance.new("UICorner", AnchorBtn)
+AnchorCorner.CornerRadius = UDim.new(0, 8)
+local UnanchorBtn = Instance.new("TextButton", MainFrame)
+UnanchorBtn.Position = UDim2.new(0.05, 0, 0.17, 0)
+UnanchorBtn.Size = UDim2.new(0.9, 0, 0, 28)
+UnanchorBtn.BackgroundColor3 = Color3.fromRGB(230, 130, 0)
+UnanchorBtn.Text = "🔓 РАЗФИКСИРОВАТЬ ВСЁ В РАДИУСЕ"
+UnanchorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+UnanchorBtn.TextSize = 11
+UnanchorBtn.Font = Enum.Font.GothamBold
+local UnanchorCorner = Instance.new("UICorner", UnanchorBtn)
+UnanchorCorner.CornerRadius = UDim.new(0, 8)
+local MirrorBtn = Instance.new("TextButton", MainFrame)
+MirrorBtn.Position = UDim2.new(0.05, 0, 0.22, 0)
+MirrorBtn.Size = UDim2.new(0.9, 0, 0, 28)
+MirrorBtn.BackgroundColor3 = Color3.fromRGB(50, 45, 65)
+MirrorBtn.Text = "ОТЗЕРКАЛИТЬ ТЕКСТ: OFF"
+MirrorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MirrorBtn.TextSize = 11
+MirrorBtn.Font = Enum.Font.GothamBold
+local MirrorCorner = Instance.new("UICorner", MirrorBtn)
+MirrorCorner.CornerRadius = UDim.new(0, 6)
+local InputFrame = Instance.new("Frame", MainFrame)
+InputFrame.Size = UDim2.new(0.9, 0, 0, 30)
+InputFrame.Position = UDim2.new(0.05, 0, 0.27, 0)
+InputFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+local IFCorner = Instance.new("UICorner", InputFrame)
+IFCorner.CornerRadius = UDim.new(0, 6)
+local InputLabel = Instance.new("TextLabel", InputFrame)
+InputLabel.Size = UDim2.new(0.3, 0, 1, 0)
+InputLabel.Position = UDim2.new(0.04, 0, 0, 0)
+InputLabel.BackgroundTransparency = 1
+InputLabel.Text = "Текст:"
+InputLabel.TextColor3 = Color3.fromRGB(180, 180, 190)
+InputLabel.TextSize = 11
+InputLabel.TextXAlignment = Enum.TextXAlignment.Left
+InputLabel.Font = Enum.Font.GothamSemibold
+local ContentBox = Instance.new("TextBox", InputFrame)
+ContentBox.Size = UDim2.new(0.62, 0, 0.75, 0)
+ContentBox.Position = UDim2.new(0.34, 0, 0.125, 0)
+ContentBox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+ContentBox.Text = "HI"
+ContentBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+ContentBox.TextSize = 11
+ContentBox.Font = Enum.Font.GothamBold
+local CBCorner = Instance.new("UICorner", ContentBox)
+CBCorner.CornerRadius = UDim.new(0, 4)
+_G.MatrixSettings = { Distance = 300, GridScale = 4.0, FaceDistance = 18, Attraction = 15, MirrorActive = false, WaitCount = 35, ReserveHeight = 16, ReserveXOffset = 0, ReserveZOffset = 0, TextYOffset = -3, TextZOffset = 0, ReserveColumns = 10, ReserveRowsMax = 3, ReserveSpacing = 3.5 }
+local function createGroupHeader(text, positionY)
+    local header = Instance.new("TextLabel", MainFrame)
+    header.Size = UDim2.new(0.9, 0, 0, 16)
+    header.Position = UDim2.new(0.05, 0, positionY, 0)
+    header.BackgroundTransparency = 1
+    header.Text = "--- " .. string.upper(text) .. " ---"
+    header.TextColor3 = Color3.fromRGB(0, 255, 180)
+    header.TextSize = 10
+    header.Font = Enum.Font.GothamBold
+    header.TextXAlignment = Enum.TextXAlignment.Center
+end
+local function createSlider(text, settingName, positionY)
+    local SliderFrame = Instance.new("Frame", MainFrame)
+    SliderFrame.Size = UDim2.new(0.9, 0, 0, 20)
+    SliderFrame.Position = UDim2.new(0.05, 0, positionY, 0)
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    local SFCorner = Instance.new("UICorner", SliderFrame)
+    SFCorner.CornerRadius = UDim.new(0, 6)
+    local Label = Instance.new("TextLabel", SliderFrame)
+    Label.Size = UDim2.new(0.65, 0, 1, 0)
+    Label.Position = UDim2.new(0.05, 0, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(180, 180, 190)
+    Label.TextSize = 10
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Font = Enum.Font.GothamSemibold
+    local Box = Instance.new("TextBox", SliderFrame)
+    Box.Size = UDim2.new(0.25, 0, 0.75, 0)
+    Box.Position = UDim2.new(0.7, 0, 0.125, 0)
+    Box.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    Box.Text = tostring(_G.MatrixSettings[settingName])
+    Box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Box.TextSize = 10
+    Box.Font = Enum.Font.GothamBold
+    local BoxCorner = Instance.new("UICorner", Box)
+    BoxCorner.CornerRadius = UDim.new(0, 4)
+    Box.FocusLost:Connect(function()
+        local num = tonumber(Box.Text)
+        if num then _G.MatrixSettings[settingName] = num else Box.Text = tostring(_G.MatrixSettings[settingName]) end
+    end)
+end
+createSlider("Радиус сканирования:", "Distance", 0.33)
+createGroupHeader("Группа: Рисунок", 0.37)
+createSlider("Шаг сетки рисунка:", "GridScale", 0.40)
+createSlider("Дист. текста от лица:", "FaceDistance", 0.44)
+createSlider("Смещение Y текста:", "TextYOffset", 0.48)
+createSlider("Смещение Z текста:", "TextZOffset", 0.52)
+createGroupHeader("Группа: Резерв", 0.56)
+createSlider("Макс. кубов (Лимит):", "WaitCount", 0.59)
+createSlider("Высота Y резерва:", "ReserveHeight", 0.63)
+createSlider("Смещение X резерва:", "ReserveXOffset", 0.67)
+createSlider("Смещение Z резерва:", "ReserveZOffset", 0.71)
+createSlider("Кол-во столбов резерва:", "ReserveColumns", 0.75)
+createSlider("Макс. рядов резерва:", "ReserveRowsMax", 0.79)
+createSlider("Расстояние в резерве:", "ReserveSpacing", 0.83)
+local Footnote = Instance.new("TextLabel", MainFrame)
+Footnote.Size = UDim2.new(1, 0, 0, 20)
+Footnote.Position = UDim2.new(0, 0, 0.95, 0)
+Footnote.BackgroundTransparency = 1
+Footnote.Text = "Нажми [Insert] чтобы скрыть меню"
+Footnote.TextColor3 = Color3.fromRGB(120, 120, 140)
+Footnote.TextSize = 10
+Footnote.Font = Enum.Font.GothamMedium
+MirrorBtn.MouseButton1Click:Connect(function()
+    _G.MatrixSettings.MirrorActive = not _G.MatrixSettings.MirrorActive
+    if _G.MatrixSettings.MirrorActive then
+        MirrorBtn.Text = "ОТЗЕРКАЛИТЬ ТЕКСТ: ON"
+        MirrorBtn.BackgroundColor3 = Color3.fromRGB(110, 50, 150)
+    else
+        MirrorBtn.Text = "ОТЗЕРКАЛИТЬ ТЕКСТ: OFF"
+        MirrorBtn.BackgroundColor3 = Color3.fromRGB(50, 45, 65)
+    end
+end)
+--2
+local RunService = game:GetService("RunService")
+local isActive = false
+local matrixConnection = nil
+local targetedParts = {}
+local origCollisions = {}
+local totalAnchoredHistory = {}
+local lastScanTime = 0
+local Font3x5 = {
+["A"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["B"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1)},
+["C"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(0,2),Vector2.new(1,1),Vector2.new(2,1)},
+["D"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1)},
+["E"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["F"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1)},
+["G"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["H"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["I"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["J"] = {Vector2.new(2,5),Vector2.new(2,4),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["M"] = {Vector2.new(0,1),Vector2.new(0,2),Vector2.new(0,3),Vector2.new(0,4),Vector2.new(0,5),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(2,1)},
+["N"] = {Vector2.new(0,1),Vector2.new(0,2),Vector2.new(0,3),Vector2.new(0,4),Vector2.new(0,5),Vector2.new(1,4),Vector2.new(1,2),Vector2.new(2,1),Vector2.new(2,2),Vector2.new(2,3),Vector2.new(2,4),Vector2.new(2,5)},
+["O"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1)},
+["P"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1)},
+["Q"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,0)},
+["R"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["S"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(1,3),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1)},
+["T"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(1,1)},
+["U"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["V"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(1,2),Vector2.new(1,1)},
+["W"] = {Vector2.new(0,1),Vector2.new(0,2),Vector2.new(0,3),Vector2.new(0,4),Vector2.new(0,5),Vector2.new(1,2),Vector2.new(1,1),Vector2.new(2,1),Vector2.new(2,2),Vector2.new(2,3),Vector2.new(2,4),Vector2.new(2,5)},
+["X"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["Y"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(1,1)},
+["Z"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["1"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["2"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["3"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["4"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(2,1)},
+["5"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["6"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["7"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(1,1)},
+["8"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1)},
+["9"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(1,1)},
+["0"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1)},
+[" "] = {}
+}
+local function generateTextGrid(text)
+    local combinedGrid = {}
+    local currentLetterOffset = 0
+    text = string.upper(text)
+    local totalWidth = text:len() * 4.5
+    local startX = -totalWidth / 2
+    for i = 1, #text do
+        local char = text:sub(i, i)
+        local matrix = Font3x5[char] or Font3x5[" "]
+        for _, point in ipairs(matrix) do
+            table.insert(combinedGrid, Vector2.new(startX + currentLetterOffset + point.X, point.Y))
+        end
+        currentLetterOffset = currentLetterOffset + 4.5
+    end
+    if _G.MatrixSettings.MirrorActive then
+        local mirroredGrid = {}
+        for i = #combinedGrid, 1, -1 do
+            local originalPoint = combinedGrid[i]
+            table.insert(mirroredGrid, Vector2.new(-originalPoint.X, originalPoint.Y))
+        end
+        return mirroredGrid
+    end
+    return combinedGrid
+end
+local function cleanPart(part)
+    if part then
+        if origCollisions[part] ~= nil then
+            pcall(function() part.CanCollide = origCollisions[part] end)
+            origCollisions[part] = nil
+        end
+        local ap = part:FindFirstChild("MatrixAlignPos")
+        local ao = part:FindFirstChild("MatrixAlignOri")
+        local att = part:FindFirstChild("MatrixAttachment")
+        if ap then pcall(function() ap:Destroy() end) end
+        if ao then pcall(function() ao:Destroy() end) end
+        if att then pcall(function() att:Destroy() end) end
+    end
+end
+--3
+_G.TextBlocks = {}
+_G.ReserveBlocks = {}
+
+local function cleanSpecificPart(part)
+    if part then
+        if origCollisions[part] ~= nil then
+            pcall(function() part.CanCollide = origCollisions[part] end)
+            origCollisions[part] = nil
+        end
+        local ap = part:FindFirstChild("MatrixAlignPos")
+        local ao = part:FindFirstChild("MatrixAlignOri")
+        local att = part:FindFirstChild("MatrixAttachment")
+        if ap then pcall(function() ap:Destroy() end) end
+        if ao then pcall(function() ao:Destroy() end) end
+        if att then pcall(function() att:Destroy() end) end
+    end
+end
+
+local function startMatrixLogic()
+    matrixConnection = RunService.Heartbeat:Connect(function()
+        local character = localPlayer.Character
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        if not rootPart then return end
+        
+        local myPos = rootPart.Position
+        local currentTime = tick()
+        local currentGrid = generateTextGrid(ContentBox.Text)
+        local textPointsNeeded = #currentGrid
+        local maxTotalBlocksAllowed = math.max(1, math.floor(_G.MatrixSettings.WaitCount))
+        
+        -- УМНЫЙ СКАНЕР СЕТКИ
+        if currentTime - lastScanTime > 0.3 then
+            lastScanTime = currentTime
+            local allCurrentBlocks = {}
+            for _, p in ipairs(_G.TextBlocks) do table.insert(allCurrentBlocks, p) end
+            for _, p in ipairs(_G.ReserveBlocks) do table.insert(allCurrentBlocks, p) end
+            
+            _G.TextBlocks = {}
+            _G.ReserveBlocks = {}
+            
+            for i = #allCurrentBlocks, 1, -1 do
+                local p = allCurrentBlocks[i]
+                if not p or not p.Parent or p.Anchored or (p.Position - myPos).Magnitude > _G.MatrixSettings.Distance then
+                    cleanSpecificPart(p)
+                    table.remove(allCurrentBlocks, i)
+                end
+            end
+            
+            if #allCurrentBlocks < maxTotalBlocksAllowed then
+                local foundParts = {}
+                for _, part in ipairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part.Anchored and not part:IsDescendantOf(character) and not part.Parent:FindFirstChildOfClass("Humanoid") then
+                        if not table.find(allCurrentBlocks, part) then
+                            local distance = (part.Position - myPos).Magnitude
+                            if distance <= _G.MatrixSettings.Distance then
+                                table.insert(foundParts, part)
+                            end
+                        end
+                    end
+                end
+                table.sort(foundParts, function(a, b)
+                    return (a.Position - myPos).Magnitude < (b.Position - myPos).Magnitude
+                end)
+                for _, part in ipairs(foundParts) do
+                    if #allCurrentBlocks >= maxTotalBlocksAllowed then break end
+                    table.insert(allCurrentBlocks, part)
+                end
+            end
+            
+            while #allCurrentBlocks > maxTotalBlocksAllowed do
+                local extraPart = table.remove(allCurrentBlocks)
+                if extraPart then cleanSpecificPart(extraPart) end
+            end
+            
+            for i, part in ipairs(allCurrentBlocks) do
+                if #_G.TextBlocks < textPointsNeeded then
+                    table.insert(_G.TextBlocks, part)
+                else
+                    table.insert(_G.ReserveBlocks, part)
+                end
+            end
+        end
+--4
+        local lookDirection = rootPart.CFrame.LookVector
+        local rightDirection = rootPart.CFrame.RightVector
+        local upDirection = rootPart.CFrame.UpVector
+        
+        -- 1. Отрендерить Рисунок
+        for index, part in ipairs(_G.TextBlocks) do
+            if part and part.Parent and index <= textPointsNeeded then
+                local targetOffset2D = currentGrid[index]
+                if origCollisions[part] == nil then origCollisions[part] = part.CanCollide end
+                pcall(function() part.CanCollide = false end)
+                pcall(function()
+                    if part:GetNetworkOwner() ~= localPlayer then part:SetNetworkOwner(localPlayer) end
+                end)
+                
+                local attachment = part:FindFirstChild("MatrixAttachment") or Instance.new("Attachment", part)
+                attachment.Name = "MatrixAttachment"
+                
+                local ap = part:FindFirstChild("MatrixAlignPos") or Instance.new("AlignPosition", part)
+                if ap.Name ~= "MatrixAlignPos" then
+                    ap.Name = "MatrixAlignPos"
+                    ap.MaxForce = math.huge
+                    ap.MaxVelocity = 250
+                    ap.Mode = Enum.PositionAlignmentMode.OneAttachment
+                    ap.Attachment0 = attachment
+                end
+                ap.Responsiveness = _G.MatrixSettings.Attraction * 5
+                
+                local ao = part:FindFirstChild("MatrixAlignOri") or Instance.new("AlignOrientation", part)
+                if ao.Name ~= "MatrixAlignOri" then
+                    ao.Name = "MatrixAlignOri"
+                    ao.MaxTorque = math.huge
+                    ao.Responsiveness = 25
+                    ao.Mode = Enum.OrientationAlignmentMode.OneAttachment
+                    ao.Attachment0 = attachment
+                end
+                
+                -- Рассчитываем Z-глубину для надписи
+                local forwardOffset = lookDirection * (_G.MatrixSettings.FaceDistance + _G.MatrixSettings.TextZOffset)
+                local horizontalOffset = rightDirection * (targetOffset2D.X * _G.MatrixSettings.GridScale)
+                local verticalOffset = upDirection * ((targetOffset2D.Y * _G.MatrixSettings.GridScale) + _G.MatrixSettings.TextYOffset)
+                local globalTargetWorldPos = myPos + forwardOffset + horizontalOffset + verticalOffset
+                
+                ap.Position = globalTargetWorldPos
+                ao.CFrame = rootPart.CFrame
+                pcall(function()
+                    part.AssemblyLinearVelocity = part.AssemblyLinearVelocity * 0.15
+                    part.AssemblyAngularVelocity = Vector3.new(0,0,0)
+                end)
+            end
+        end
+        
+        -- 2. Отрендерить сетку Резерва
+        for reserveIndex, part in ipairs(_G.ReserveBlocks) do
+            if part and part.Parent then
+                if origCollisions[part] == nil then origCollisions[part] = part.CanCollide end
+                pcall(function() part.CanCollide = true end)
+                pcall(function()
+                    if part:GetNetworkOwner() ~= localPlayer then part:SetNetworkOwner(localPlayer) end
+                end)
+                
+                local attachment = part:FindFirstChild("MatrixAttachment") or Instance.new("Attachment", part)
+                attachment.Name = "MatrixAttachment"
+                
+                local ap = part:FindFirstChild("MatrixAlignPos") or Instance.new("AlignPosition", part)
+                if ap.Name ~= "MatrixAlignPos" then
+                    ap.Name = "MatrixAlignPos"
+                    ap.MaxForce = math.huge
+                    ap.MaxVelocity = 250
+                    ap.Mode = Enum.PositionAlignmentMode.OneAttachment
+                    ap.Attachment0 = attachment
+                end
+                ap.Responsiveness = _G.MatrixSettings.Attraction * 5
+                
+                local ao = part:FindFirstChild("MatrixAlignOri") or Instance.new("AlignOrientation", part)
+                if ao.Name ~= "MatrixAlignOri" then
+                    ao.Name = "MatrixAlignOri"
+                    ao.MaxTorque = math.huge
+                    ao.Responsiveness = 25
+                    ao.Mode = Enum.OrientationAlignmentMode.OneAttachment
+                    ao.Attachment0 = attachment
+                end
+                
+                local maxCols = math.max(1, math.floor(_G.MatrixSettings.ReserveColumns))
+                local maxRows = math.max(1, math.floor(_G.MatrixSettings.ReserveRowsMax))
+                local spacing = _G.MatrixSettings.ReserveSpacing
+                
+                local colIndex = (reserveIndex - 1) % maxCols
+                local rowIndex = math.floor((reserveIndex - 1) / maxCols)
+                if rowIndex >= maxRows then rowIndex = maxRows - 1 end
+                
+                local rowWidthOffset = ((maxCols - 1) * spacing) / 2
+                local xPos = (colIndex * spacing) - rowWidthOffset + _G.MatrixSettings.ReserveXOffset
+                local yPos = _G.MatrixSettings.ReserveHeight + (rowIndex * spacing)
+                
+                -- Применяем Z-глубину для резервной очереди кубов
+                local forwardOffset = lookDirection * _G.MatrixSettings.ReserveZOffset
+                local horizontalOffset = rightDirection * xPos
+                local verticalOffset = upDirection * yPos
+                local globalTargetWorldPos = myPos + forwardOffset + horizontalOffset + verticalOffset
+                
+                ap.Position = globalTargetWorldPos
+                ao.CFrame = rootPart.CFrame
+                pcall(function()
+                    local currentVelocity = part.AssemblyLinearVelocity
+                    part.AssemblyLinearVelocity = currentVelocity * 0.15
+                    part.AssemblyAngularVelocity = Vector3.new(0,0,0)
+                end)
+            end
+        end
+    end)
+end
+
+local function deleteForces()
+    if matrixConnection then matrixConnection:Disconnect(); matrixConnection = nil end
+    for _, part in ipairs(_G.TextBlocks) do cleanPart(part) end
+    for _, part in ipairs(_G.ReserveBlocks) do cleanPart(part) end
+    for part, col in pairs(origCollisions) do
+        if part and part.Parent then pcall(function() part.CanCollide = col end) end
+    end
+    _G.TextBlocks = {}
+    _G.ReserveBlocks = {}
+    targetedParts = {}
+    origCollisions = {}
+end
+
+AnchorBtn.MouseButton1Click:Connect(function()
+    local function anchorPool(pool)
+        for _, part in ipairs(pool) do
+            if part and part.Parent then
+                pcall(function()
+                    local ap = part:FindFirstChild("MatrixAlignPos")
+                    local ao = part:FindFirstChild("MatrixAlignOri")
+                    local att = part:FindFirstChild("MatrixAttachment")
+                    if ap then ap:Destroy() end
+                    if ao then ao:Destroy() end
+                    if att then att:Destroy() end
+                    part.Anchored = true
+                    totalAnchoredHistory[part] = origCollisions[part] or true
+                end)
+            end
+        end
+    end
+    anchorPool(_G.TextBlocks)
+    anchorPool(_G.ReserveBlocks)
+    _G.TextBlocks = {}
+    _G.ReserveBlocks = {}
+    targetedParts = {}
+    origCollisions = {}
+end)
+
+UnanchorBtn.MouseButton1Click:Connect(function()
+    local character = localPlayer.Character
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    local myPos = rootPart.Position
+    for part, savedCollision in pairs(totalAnchoredHistory) do
+        if part and part.Parent then
+            local distance = (part.Position - myPos).Magnitude
+            if distance <= _G.MatrixSettings.Distance then
+                pcall(function()
+                    part.Anchored = false
+                    part.CanCollide = savedCollision
+                    totalAnchoredHistory[part] = nil
+                end)
+            end
+        end
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == Enum.KeyCode.Insert then MainFrame.Visible = not MainFrame.Visible end
+end)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    isActive = not isActive
+    if isActive then
+        ToggleBtn.Text = "ВЫКЛЮЧИТЬ СБОР БЛОКОВ"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+        startMatrixLogic()
+    else
+        ToggleBtn.Text = "ВКЛЮЧИТЬ СБОР БЛОКОВ"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
+        deleteForces()
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function() deleteForces(); ScreenGui:Destroy() end)
