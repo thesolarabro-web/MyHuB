@@ -1,755 +1,718 @@
---1
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local localPlayer = Players.LocalPlayer
-local targetParent = nil
-
-pcall(function() targetParent = game:GetService("CoreGui") end)
-if not targetParent then pcall(function() targetParent = game:GetService("RobloxGui") end) end
-if not targetParent then targetParent = localPlayer:WaitForChild("PlayerGui") end
-
-if targetParent:FindFirstChild("TornadoWaypointsUI") then targetParent["TornadoWaypointsUI"]:Destroy() end
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "TornadoWaypointsUI"
+ScreenGui.Name = "TitaniumPurpleControl"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = targetParent
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 310, 0, 440)
-MainFrame.Position = UDim2.new(0.15, 0, 0.15, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 12, 22)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.ClipsDescendants = true
-
-local MainCorner = Instance.new("UICorner", MainFrame)
-MainCorner.CornerRadius = UDim.new(0, 10)
-local MainStroke = Instance.new("UIStroke", MainFrame)
-MainStroke.Color = Color3.fromRGB(157, 78, 221)
-MainStroke.Thickness = 1.5
-
-local Header = Instance.new("Frame", MainFrame)
-Header.Size = UDim2.new(1, 0, 0, 38)
-Header.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
-Header.BorderSizePixel = 0
-Header.ZIndex = 5
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
-
-local Title = Instance.new("TextLabel", Header)
-Title.Size = UDim2.new(1, -50, 1, 0)
-Title.Position = UDim2.new(0, 14, 0, 0)
-Title.Text = "📌 WAYPOINTS SYSTEM v4.3"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 12
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.BackgroundTransparency = 1
-Title.ZIndex = 6
-
-local CloseBtn = Instance.new("TextButton", Header)
-CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-CloseBtn.Position = UDim2.new(1, -34, 0, 7)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 30)
-CloseBtn.Text = ""
-CloseBtn.ZIndex = 12
-Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 5)
-local CloseStroke = Instance.new("UIStroke", CloseBtn)
-CloseStroke.Color = Color3.fromRGB(157, 78, 221)
-
-local Line1 = Instance.new("Frame", CloseBtn)
-Line1.Size = UDim2.new(0, 12, 0, 2)
-Line1.Position = UDim2.new(0.5, -6, 0.5, -1)
-Line1.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-Line1.BorderSizePixel = 0
-Line1.Rotation = 45
-Line1.ZIndex = 13
-
-local Line2 = Instance.new("Frame", CloseBtn)
-Line2.Size = UDim2.new(0, 12, 0, 2)
-Line2.Position = UDim2.new(0.5, -6, 0.5, -1)
-Line2.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-Line2.BorderSizePixel = 0
-Line2.Rotation = -45
-Line2.ZIndex = 13
-
-local ConfirmFrame = Instance.new("Frame", MainFrame)
-ConfirmFrame.Size = UDim2.new(1, 0, 1, 0)
-ConfirmFrame.BackgroundColor3 = Color3.fromRGB(10, 8, 15)
-ConfirmFrame.BackgroundTransparency = 0.3
-ConfirmFrame.ZIndex = 100
-ConfirmFrame.Visible = false
-
-local ConfirmBox = Instance.new("Frame", ConfirmFrame)
-ConfirmBox.Size = UDim2.new(0, 220, 0, 100)
-ConfirmBox.Position = UDim2.new(0.5, -110, 0.5, -50)
-ConfirmBox.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
-ConfirmBox.ZIndex = 101
-Instance.new("UICorner", ConfirmBox).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", ConfirmBox).Color = Color3.fromRGB(255, 50, 75)
-
-local ConfirmText = Instance.new("TextLabel", ConfirmBox)
-ConfirmText.Size = UDim2.new(1, 0, 0, 40)
-ConfirmText.Text = "Закрыть меню?\nClose menu?"
-ConfirmText.TextColor3 = Color3.fromRGB(255, 255, 255)
-ConfirmText.Font = Enum.Font.GothamBold
-ConfirmText.TextSize = 11
-ConfirmText.BackgroundTransparency = 1
-ConfirmText.ZIndex = 102
-
-local YesBtn = Instance.new("TextButton", ConfirmBox)
-YesBtn.Size = UDim2.new(0, 80, 0, 26)
-YesBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
-YesBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
-YesBtn.Text = "YES / ДА"
-YesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-YesBtn.Font = Enum.Font.GothamBold
-YesBtn.TextSize = 10
-YesBtn.ZIndex = 102
-Instance.new("UICorner", YesBtn).CornerRadius = UDim.new(0, 4)
-
-local NoBtn = Instance.new("TextButton", ConfirmBox)
-NoBtn.Size = UDim2.new(0, 80, 0, 26)
-NoBtn.Position = UDim2.new(0.55, 0, 0.6, 0)
-NoBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-NoBtn.Text = "NO / НЕТ"
-NoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoBtn.Font = Enum.Font.GothamBold
-NoBtn.TextSize = 10
-NoBtn.ZIndex = 102
-Instance.new("UICorner", NoBtn).CornerRadius = UDim.new(0, 4)
-
-CloseBtn.MouseButton1Click:Connect(function() ConfirmFrame.Visible = true end)
-YesBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-NoBtn.MouseButton1Click:Connect(function() ConfirmFrame.Visible = false end)
---1
---2
-local TabBar = Instance.new("Frame", MainFrame)
-TabBar.Size = UDim2.new(1, -30, 0, 26)
-TabBar.Position = UDim2.new(0, 15, 0, 46)
-TabBar.BackgroundTransparency = 1
-TabBar.ZIndex = 3
-local TabListLayout = Instance.new("UIListLayout", TabBar)
-TabListLayout.FillDirection = Enum.FillDirection.Horizontal
-TabListLayout.Padding = UDim.new(0, 6)
-
-local function CreateTabButton(text)
-    local btn = Instance.new("TextButton", TabBar)
-    btn.Size = UDim2.new(0, 80, 1, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(130, 130, 150)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 10
-    btn.ZIndex = 4
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-    local stroke = Instance.new("UIStroke", btn)
-    stroke.Color = Color3.fromRGB(60, 45, 80)
-    return btn, stroke
-end
-
-local TabTpBtn, TabTpStroke = CreateTabButton("ТП")
-local TabSetBtn, TabSetStroke = CreateTabButton("SETTINGS")
-
-local TpPage = Instance.new("Frame", MainFrame)
-TpPage.Size = UDim2.new(1, -30, 1, -120)
-TpPage.Position = UDim2.new(0, 15, 0, 78)
-TpPage.BackgroundTransparency = 1
-TpPage.ZIndex = 2
-
-local SetPage = Instance.new("ScrollingFrame", MainFrame)
-SetPage.Size = UDim2.new(1, -30, 1, -120)
-SetPage.Position = UDim2.new(0, 15, 0, 78)
-SetPage.BackgroundTransparency = 1
-SetPage.Visible = false
-SetPage.ZIndex = 2
-SetPage.ScrollBarThickness = 2
-SetPage.CanvasSize = UDim2.new(0, 0, 0, 450)
-local SetList = Instance.new("UIListLayout", SetPage)
-SetList.Padding = UDim.new(0, 6)
-
-local function switchTab(isTp)
-    TpPage.Visible = isTp
-    SetPage.Visible = not isTp
-    TabTpBtn.TextColor3 = isTp and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
-    TabTpStroke.Color = isTp and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(60, 45, 80)
-    TabSetBtn.TextColor3 = not isTp and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
-    TabSetStroke.Color = not isTp and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(60, 45, 80)
-end
-TabTpBtn.MouseButton1Click:Connect(function() switchTab(true) end)
-TabSetBtn.MouseButton1Click:Connect(function() switchTab(false) end)
-
-local AutoTpBtn = Instance.new("TextButton", TpPage)
-AutoTpBtn.Size = UDim2.new(1, 0, 0, 24)
-AutoTpBtn.Position = UDim2.new(0, 0, 0, 0)
-AutoTpBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
-AutoTpBtn.Text = "АВТО ТЕЛЕПОРТ: ВЫКЛ"
-AutoTpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoTpBtn.Font = Enum.Font.GothamBold
-AutoTpBtn.TextSize = 10
-AutoTpBtn.ZIndex = 3
-Instance.new("UICorner", AutoTpBtn).CornerRadius = UDim.new(0, 5)
-
-local ConfigFrame = Instance.new("Frame", TpPage)
-ConfigFrame.Size = UDim2.new(1, 0, 0, 24)
-ConfigFrame.Position = UDim2.new(0, 0, 0, 29)
-ConfigFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
-ConfigFrame.ZIndex = 3
-Instance.new("UICorner", ConfigFrame).CornerRadius = UDim.new(0, 5)
-
-local ConfigLabel = Instance.new("TextLabel", ConfigFrame)
-ConfigLabel.Size = UDim2.new(0.65, 0, 1, 0)
-ConfigLabel.Position = UDim2.new(0.04, 0, 0, 0)
-ConfigLabel.BackgroundTransparency = 1
-ConfigLabel.Text = "Задержка Авто ТП (сек):"
-ConfigLabel.TextColor3 = Color3.fromRGB(180, 180, 190)
-ConfigLabel.TextSize = 9
-ConfigLabel.TextXAlignment = Enum.TextXAlignment.Left
-ConfigLabel.Font = Enum.Font.GothamSemibold
-ConfigLabel.ZIndex = 4
-
-local IntervalBox = Instance.new("TextBox", ConfigFrame)
-IntervalBox.Size = UDim2.new(0.25, 0, 0.7, 0)
-IntervalBox.Position = UDim2.new(0.7, 0, 0.15, 0)
-IntervalBox.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-IntervalBox.Text = "0.5"
-IntervalBox.TextColor3 = Color3.fromRGB(157, 78, 221)
-IntervalBox.TextSize = 10
-IntervalBox.Font = Enum.Font.GothamBold
-IntervalBox.ZIndex = 4
-Instance.new("UICorner", IntervalBox).CornerRadius = UDim.new(0, 4)
-
-local ScrollContainer = Instance.new("ScrollingFrame", TpPage)
-ScrollContainer.Size = UDim2.new(1, 0, 1, -58)
-ScrollContainer.Position = UDim2.new(0, 0, 0, 58)
-ScrollContainer.BackgroundTransparency = 1
-ScrollContainer.ScrollBarThickness = 2
-ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollContainer.ZIndex = 3
-
-local GridGrip = Instance.new("UIGridLayout", ScrollContainer)
-GridGrip.CellSize = UDim2.new(1, -6, 0, 36)
-GridGrip.CellPadding = UDim2.new(0, 6, 0, 5)
-GridGrip.SortOrder = Enum.SortOrder.LayoutOrder
-
-_G.WaypointsSettings = {
-    Method = "TP", FlySpeed = 50, TpFlyDist = 10,
-    TpFlyDelay = 0.05, AutoActive = false, IsMoving = false
+local Theme = {
+    MainBg = Color3.fromRGB(24, 24, 26),
+    TopBg = Color3.fromRGB(34, 34, 36),
+    ButtonBg = Color3.fromRGB(44, 44, 46),
+    InputBg = Color3.fromRGB(36, 26, 50),
+    AddBtnBg = Color3.fromRGB(64, 64, 68),
+    GroupBg = Color3.fromRGB(48, 48, 52),
+    NeonGlow = Color3.fromRGB(150, 50, 230),
+    NeonActive = Color3.fromRGB(0, 215, 130),
+    NeonAlert = Color3.fromRGB(220, 45, 85),
+    TextLight = Color3.fromRGB(240, 240, 245),
+    TextGlow = Color3.fromRGB(190, 130, 255),
+    FontBold = Enum.Font.GothamBold,
+    FontRegular = Enum.Font.Gotham,
+    TextSize = 12
 }
+
+local Lang = {
+    current = "RU",
+    RU = {
+        tp = "ТП", freq = "Частота (сек):", save = "Сохр",
+        quick_tp = "ТП", load = "Загрузить", export = "Выгрузить",
+        method = "Метод:", speed = "Скорость полёта:",
+        range = "Дальность FlyTP:", freq_fly = "Частота FlyTP (сек):",
+        lang = "Язык: RU", confirm_title = "Закрыть чит?",
+        yes = "Да", no = "Нет", placeholder = "Имя сохранения...",
+        auto_on = "Авто ТП [ВКЛ]", auto_off = "Авто ТП [ВЫКЛ]",
+        p_aut = "Авт", p_aut_on = "[А]",
+        cfg_header = "КОНФИГУРАЦИЯ", method_header = "РЕЖИМ ДВИЖЕНИЯ"
+    },
+    EN = {
+        tp = "TP", freq = "Interval (sec):", save = "Save",
+        quick_tp = "TP", load = "Load", export = "Export",
+        method = "Method:", speed = "Fly Speed:",
+        range = "FlyTP Range:", freq_fly = "FlyTP Interval (sec):",
+        lang = "Lang: EN", confirm_title = "Close UI?",
+        yes = "Yes", no = "No", placeholder = "Config name...",
+        auto_on = "Auto TP [ON]", auto_off = "Auto TP [OFF]",
+        p_aut = "Aut", p_aut_on = "[A]",
+        cfg_header = "CONFIGURATION", method_header = "MOVEMENT METHOD"
+    }
+}
+
+local function addNeonStroke(parent, color, thickness)
+    local stroke = parent:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke")
+    stroke.Color = color
+    stroke.Thickness = thickness or 1.2
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.LineJoinMode = Enum.LineJoinMode.Round
+    stroke.Transparency = 0.15
+    stroke.Parent = parent
+    return stroke
+end
+
+local function createNeonButton(name, text, pos, size, parent, bg, strokeColor)
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Text = text
+    btn.Position = pos
+    btn.Size = size
+    btn.BackgroundColor3 = bg or Theme.ButtonBg
+    btn.TextColor3 = Theme.TextLight
+    btn.Font = Theme.FontBold
+    btn.TextSize = Theme.TextSize
+    btn.BorderSizePixel = 0
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = btn
+    addNeonStroke(btn, strokeColor or Theme.NeonGlow, 1)
+    btn.Parent = parent
+    return btn
+end
+
+local currentBind = Enum.KeyCode.Insert
+local pointsList = {}
+local autoTpEnabled = false
+local autoTpInterval = 1.0
+local Config = { method = "Tp", flySpeed = 50, flyTpRange = 15, flyTpInterval = 0.2, selectedConfigName = "Default" }
+local collapsed = false
+local isResizing = false
+local savedExpandedHeight = 404
+local savedExpandedWidth = 384
+
+local OutlineFrame = Instance.new("Frame")
+OutlineFrame.Name = "OutlineFrame"
+OutlineFrame.Size = UDim2.new(0, 384, 0, 404)
+OutlineFrame.Position = UDim2.new(0.5, -192, 0.3, 0)
+OutlineFrame.BackgroundColor3 = Theme.MainBg
+OutlineFrame.BorderSizePixel = 0
+OutlineFrame.Active = true
+OutlineFrame.Parent = ScreenGui
+addNeonStroke(OutlineFrame, Theme.NeonGlow, 3)
+local MainCorner = Instance.new("UICorner") MainCorner.CornerRadius = UDim.new(0, 6) MainCorner.Parent = OutlineFrame
+
+local TopFrame = Instance.new("Frame")
+TopFrame.Name = "TopFrame"
+TopFrame.Size = UDim2.new(1, 0, 0, 40)
+TopFrame.BackgroundColor3 = Theme.TopBg
+TopFrame.BorderSizePixel = 0
+TopFrame.Parent = OutlineFrame
+local TopCorner = Instance.new("UICorner") TopCorner.CornerRadius = UDim.new(0, 6) TopCorner.Parent = TopFrame
+
+local TpMenuBtn = createNeonButton("TpMenuBtn", "ТП", UDim2.new(0, 10, 0, 5), UDim2.new(0, 100, 0, 30), TopFrame)
+local SettingsMenuBtn = createNeonButton("SettingsMenuBtn", "⚙️", UDim2.new(0, 115, 0, 5), UDim2.new(0, 35, 0, 30), TopFrame)
+local CollapseBtn = createNeonButton("CollapseBtn", "▲", UDim2.new(1, -75, 0, 5), UDim2.new(0, 30, 0, 30), TopFrame)
+local CloseUiBtn = createNeonButton("CloseUiBtn", "X", UDim2.new(1, -35, 0, 5), UDim2.new(0, 30, 0, 30), TopFrame, Theme.MainBg, Theme.NeonGlow)
+
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Size = UDim2.new(1, 0, 1, -40)
+ContentFrame.Position = UDim2.new(0, 0, 0, 40)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.BorderSizePixel = 0
+ContentFrame.ClipsDescendants = true
+ContentFrame.Parent = OutlineFrame
+
 --2
+local dragToggle, dragStart, startPos
+TopFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and not isResizing then
+        dragToggle = true
+        dragStart = input.Position
+        startPos = OutlineFrame.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragToggle and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        OutlineFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragToggle = false end
+end)
+
+local TpFrame = Instance.new("Frame")
+TpFrame.Size = UDim2.new(1, 0, 1, 0)
+TpFrame.BackgroundTransparency = 1
+TpFrame.Visible = true
+TpFrame.Parent = ContentFrame
+
+local AutoActionRow = Instance.new("Frame")
+AutoActionRow.Size = UDim2.new(1, -20, 0, 35)
+AutoActionRow.Position = UDim2.new(0, 10, 0, 10)
+AutoActionRow.BackgroundTransparency = 1
+AutoActionRow.Parent = TpFrame
+
+local AutoTpBtn = createNeonButton("AutoTpBtn", "Авто ТП [ВЫКЛ]", UDim2.new(0, 0, 0, 0), UDim2.new(0.5, -5, 1, 0), AutoActionRow, Theme.ButtonBg, Theme.NeonGlow)
+
+local IntervalContainer = Instance.new("Frame")
+IntervalContainer.Size = UDim2.new(0.5, -5, 1, 0)
+IntervalContainer.Position = UDim2.new(0.5, 5, 0, 0)
+IntervalContainer.BackgroundColor3 = Theme.GroupBg
+IntervalContainer.BorderSizePixel = 0
+IntervalContainer.Parent = AutoActionRow
+local icCorner = Instance.new("UICorner") icCorner.CornerRadius = UDim.new(0, 4) icCorner.Parent = IntervalContainer
+addNeonStroke(IntervalContainer, Theme.NeonGlow, 1)
+
+local IntervalLabel = Instance.new("TextLabel")
+IntervalLabel.Text = "Частота (сек):"
+IntervalLabel.Size = UDim2.new(0.6, -5, 1, 0)
+IntervalLabel.Position = UDim2.new(0, 5, 0, 0)
+IntervalLabel.BackgroundTransparency = 1
+IntervalLabel.TextColor3 = Theme.TextGlow
+IntervalLabel.Font = Theme.FontRegular
+IntervalLabel.TextSize = 11
+IntervalLabel.TextXAlignment = Enum.TextXAlignment.Left
+IntervalLabel.Parent = IntervalContainer
+
+local IntervalInput = Instance.new("TextBox")
+IntervalInput.Text = tostring(autoTpInterval)
+IntervalInput.Size = UDim2.new(0.4, -5, 1, -8)
+IntervalInput.Position = UDim2.new(0.6, 0, 0, 4)
+IntervalInput.BackgroundColor3 = Theme.InputBg
+IntervalInput.TextColor3 = Theme.TextLight
+IntervalInput.BorderSizePixel = 0
+IntervalInput.Font = Theme.FontBold
+IntervalInput.TextSize = 11
+IntervalInput.Parent = IntervalContainer
+local iiCorner = Instance.new("UICorner") iiCorner.CornerRadius = UDim.new(0, 4) iiCorner.Parent = IntervalInput
+addNeonStroke(IntervalInput, Theme.NeonGlow, 1)
+
+IntervalInput.FocusLost:Connect(function()
+    autoTpInterval = math.max(0, tonumber(IntervalInput.Text) or autoTpInterval)
+    IntervalInput.Text = tostring(autoTpInterval)
+end)
 --3
-local pointsData = {}
-local dragToggle = false
-local dragStart = Vector3.new()
-local startPos = UDim2.new()
-local currentKeyBind = Enum.KeyCode.Insert
-local isBindingKey = false
-local currentLanguage = "RUS"
-local rowContainer = {}
+local PointsScroll = Instance.new("ScrollingFrame")
+PointsScroll.Size = UDim2.new(1, -20, 1, -65)
+PointsScroll.Position = UDim2.new(0, 10, 0, 55)
+PointsScroll.BackgroundTransparency = 1
+PointsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+PointsScroll.ScrollBarThickness = 4
+PointsScroll.ScrollingEnabled = true
+PointsScroll.ScrollBarImageColor3 = Theme.NeonGlow
+PointsScroll.Parent = TpFrame
 
-local function createSettingsRow(text, parent)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(1, -6, 0, 28)
-    frame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
-    frame.ZIndex = 3
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 5)
-    local stroke = Instance.new("UIStroke", frame)
-    stroke.Color = Color3.fromRGB(60, 45, 80)
-    
-    local label = Instance.new("TextLabel", frame)
-    label.Size = UDim2.new(0.5, 0, 1, 0)
-    label.Position = UDim2.new(0.04, 0, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(180, 180, 190)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 9
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.ZIndex = 4
-    return frame, label
+local UIGridLayout = Instance.new("UIGridLayout")
+UIGridLayout.CellPadding = UDim2.new(0, 8, 0, 8)
+UIGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIGridLayout.Parent = PointsScroll
+
+local function updateGridLayout()
+    local currentWidth = OutlineFrame.AbsoluteSize.X
+    local columns = 1
+    if currentWidth >= 700 then columns = 4
+    elseif currentWidth >= 520 then columns = 3
+    elseif currentWidth >= 340 then columns = 2 end
+    local paddingTotal = UIGridLayout.CellPadding.X.Offset * (columns - 1)
+    local scrollWidth = PointsScroll.AbsoluteSize.X
+    if scrollWidth == 0 then scrollWidth = currentWidth - 20 end
+    local cellWidth = (scrollWidth - paddingTotal) / columns
+    UIGridLayout.CellSize = UDim2.new(0, cellWidth, 0, 65)
+    PointsScroll.CanvasSize = UDim2.new(0, 0, 0, UIGridLayout.AbsoluteContentSize.Y)
 end
 
-local LangFrame, LangLabel = createSettingsRow("ЯЗЫК / LANGUAGE: RUS", SetPage)
-local LangBtn = Instance.new("TextButton", LangFrame)
-LangBtn.Size = UDim2.new(0.4, 0, 0.7, 0)
-LangBtn.Position = UDim2.new(0.56, 0, 0.15, 0)
-LangBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-LangBtn.Text = "RUS"
-LangBtn.TextColor3 = Color3.fromRGB(157, 78, 221)
-LangBtn.Font = Enum.Font.GothamBold
-LangBtn.TextSize = 9
-Instance.new("UICorner", LangBtn).CornerRadius = UDim.new(0, 4)
-
-local BindFrame, BindLabel = createSettingsRow("КЛАВИША СКРЫТИЯ: INSERT", SetPage)
-local BindBtn = Instance.new("TextButton", BindFrame)
-BindBtn.Size = UDim2.new(0.4, 0, 0.7, 0)
-BindBtn.Position = UDim2.new(0.56, 0, 0.15, 0)
-BindBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-BindBtn.Text = "INSERT"
-BindBtn.TextColor3 = Color3.fromRGB(157, 78, 221)
-BindBtn.Font = Enum.Font.GothamBold
-BindBtn.TextSize = 9
-Instance.new("UICorner", BindBtn).CornerRadius = UDim.new(0, 4)
-
-local MethodFrame, MethodLabel = createSettingsRow("МЕТОД / METHOD: TP", SetPage)
-local MethodBtn = Instance.new("TextButton", MethodFrame)
-MethodBtn.Size = UDim2.new(0.4, 0, 0.7, 0)
-MethodBtn.Position = UDim2.new(0.56, 0, 0.15, 0)
-MethodBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-MethodBtn.Text = "TP"
-MethodBtn.TextColor3 = Color3.fromRGB(157, 78, 221)
-MethodBtn.Font = Enum.Font.GothamBold
-MethodBtn.TextSize = 9
-Instance.new("UICorner", MethodBtn).CornerRadius = UDim.new(0, 4)
-
-local function createSlider(text, settingName, min, max, parent)
-    local f, lbl = createSettingsRow(text, parent)
-    local box = Instance.new("TextBox", f)
-    box.Size = UDim2.new(0.3, 0, 0.7, 0)
-    box.Position = UDim2.new(0.66, 0, 0.15, 0)
-    box.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-    box.Text = tostring(_G.WaypointsSettings[settingName])
-    box.TextColor3 = Color3.fromRGB(157, 78, 221)
-    box.Font = Enum.Font.GothamBold
-    box.TextSize = 9
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
-    box.FocusLost:Connect(function()
-        local num = tonumber(box.Text)
-        if num then
-            _G.WaypointsSettings[settingName] = math.clamp(num, min, max)
-        else
-            box.Text = tostring(_G.WaypointsSettings[settingName])
-        end
-    end)
-    return lbl, box
+local function getCurrentCFrame()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        return LocalPlayer.Character.HumanoidRootPart.CFrame
+    end
+    return CFrame.new(0, 15, 0)
 end
 
-local SliderSpeedLabel, SpeedBox = createSlider("Скорость полёта (Fly Speed):", "FlySpeed", 1, 500, SetPage)
-local SliderDistLabel, DistBox = createSlider("Дальность TpFly (Dist):", "TpFlyDist", 1, 50, SetPage)
-local SliderDelayLabel, DelayBox = createSlider("Интервал TpFly (Delay):", "TpFlyDelay", 0.001, 2, SetPage)
---3
+local function lerpMove(targetCF, duration)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    local startCF = root.CFrame
+    local elapsed = 0
+    while elapsed < duration and autoTpEnabled do
+        local dt = RunService.Heartbeat:Wait()
+        elapsed = elapsed + dt
+        root.CFrame = startCF:Lerp(targetCF, math.min(1, elapsed / duration))
+    end
+    if autoTpEnabled then root.CFrame = targetCF end
+end
+
+local function stepMove(targetCF, range, interval)
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    while (root.Position - targetCF.Position).Magnitude > range and autoTpEnabled do
+        local dir = (targetCF.Position - root.Position).Unit
+        root.CFrame = CFrame.new(root.Position + (dir * range), targetCF.Position)
+        task.wait(interval)
+    end
+    if autoTpEnabled then root.CFrame = targetCF end
+end
 --4
-local function createInputBox(text, parent)
-    local f, lbl = createSettingsRow(text, parent)
-    local tBox = Instance.new("TextBox", f)
-    tBox.Size = UDim2.new(0.4, 0, 0.7, 0)
-    tBox.Position = UDim2.new(0.56, 0, 0.15, 0)
-    tBox.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-    tBox.Text = "waypoints"
-    tBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tBox.Font = Enum.Font.GothamBold
-    tBox.TextSize = 9
-    Instance.new("UICorner", tBox).CornerRadius = UDim.new(0, 4)
-    return lbl, tBox
-end
+local draggingFrame = nil
+local activeGripInput = nil
 
-local FileNameLabel, FileNameBox = createInputBox("Имя файла / File name:", SetPage)
-
-local SaveFrame, SaveLabel = createSettingsRow("ФАЙЛОВАЯ СИСТЕМА / FILE", SetPage)
-local SaveFileBtn = Instance.new("TextButton", SaveFrame)
-SaveFileBtn.Size = UDim2.new(0.4, 0, 0.7, 0)
-SaveFileBtn.Position = UDim2.new(0.56, 0, 0.15, 0)
-SaveFileBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-SaveFileBtn.Text = "СОХРАНИТЬ"
-SaveFileBtn.TextColor3 = Color3.fromRGB(0, 180, 120)
-SaveFileBtn.Font = Enum.Font.GothamBold
-SaveFileBtn.TextSize = 9
-Instance.new("UICorner", SaveFileBtn).CornerRadius = UDim.new(0, 4)
-
-local LoadFrame, LoadLabel = createSettingsRow("ФАЙЛОВАЯ СИСТЕМА / FILE", SetPage)
-local LoadFileBtn = Instance.new("TextButton", LoadFrame)
-LoadFileBtn.Size = UDim2.new(0.4, 0, 0.7, 0)
-LoadFileBtn.Position = UDim2.new(0.56, 0, 0.15, 0)
-LoadFileBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-LoadFileBtn.Text = "ЗАГРУЗИТЬ"
-LoadFileBtn.TextColor3 = Color3.fromRGB(157, 78, 221)
-LoadFileBtn.Font = Enum.Font.GothamBold
-LoadFileBtn.TextSize = 9
-Instance.new("UICorner", LoadFileBtn).CornerRadius = UDim.new(0, 4)
-
-local AddPointBtn = Instance.new("TextButton", ScrollContainer)
-AddPointBtn.BackgroundColor3 = Color3.fromRGB(35, 32, 45)
-AddPointBtn.Text = "[ + ]"
-AddPointBtn.TextColor3 = Color3.fromRGB(160, 160, 175)
-AddPointBtn.Font = Enum.Font.GothamBold
-AddPointBtn.TextSize = 12
-AddPointBtn.LayoutOrder = 999999
-AddPointBtn.ZIndex = 4
-Instance.new("UICorner", AddPointBtn).CornerRadius = UDim.new(0, 6)
-
-local function updateScrollCanvas()
-    if MainFrame.AbsoluteSize.X >= 480 then
-        GridGrip.CellSize = UDim2.new(0.5, -5, 0, 36)
-    else
-        GridGrip.CellSize = UDim2.new(1, -6, 0, 36)
+local renderPoints
+renderPoints = function()
+    for _, child in pairs(PointsScroll:GetChildren()) do
+        if child:IsA("Frame") or child:IsA("TextButton") then child:Destroy() end
     end
-    ScrollContainer.CanvasSize = UDim2.new(0, 0, 0, GridGrip.AbsoluteContentSize.Y + 15)
-end
+    local c = Lang.current
+    for idx, pData in ipairs(pointsList) do
+        local pFrame = Instance.new("Frame")
+        pFrame.BackgroundColor3 = Theme.TopBg
+        local pCorner = Instance.new("UICorner") pCorner.CornerRadius = UDim.new(0, 4) pCorner.Parent = pFrame
+        addNeonStroke(pFrame, pData.autoTp and Theme.NeonActive or Theme.NeonGlow, 1)
+        
+        local delBtn = createNeonButton("Del", "X", UDim2.new(0, 4, 0, 4), UDim2.new(0, 18, 0, 18), pFrame, Theme.MainBg, Theme.NeonAlert)
+        delBtn.TextSize = 10 delBtn.TextColor3 = Theme.NeonAlert
+        delBtn.MouseButton1Click:Connect(function() table.remove(pointsList, idx) renderPoints() end)
+        
+        local grip = Instance.new("TextButton")
+        grip.Text = "::"
+        grip.Size = UDim2.new(0, 16, 0, 22)
+        grip.Position = UDim2.new(1, -20, 0, 2)
+        grip.BackgroundTransparency = 1
+        grip.TextColor3 = Color3.fromRGB(255, 255, 255)
+        grip.Font = Theme.FontBold
+        grip.TextSize = 14
+        grip.Parent = pFrame
 
-local function updateLocalization()
-    local isEng = (currentLanguage == "ENG")
-    TabTpBtn.Text = isEng and "WP" or "ТП"
-    ConfigLabel.Text = isEng and "Auto TP Interval (sec):" or "Задержка Авто ТП (сек):"
-    
-    if _G.WaypointsSettings.AutoActive then
-        AutoTpBtn.Text = isEng and "AUTO TELEPORT: ON" or "АВТО ТЕЛЕПОРТ: ВКЛ"
-        AutoTpBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
-    else
-        AutoTpBtn.Text = isEng and "AUTO TELEPORT: OFF" or "АВТО ТЕЛЕПОРТ: ВЫКЛ"
-        AutoTpBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
+        grip.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                draggingFrame = pFrame
+                activeGripInput = input
+                pFrame.ZIndex = 10
+                UIGridLayout.Enabled = false
+            end
+        end)
+        
+        local nameInput = Instance.new("TextBox")
+        nameInput.Text = pData.name
+        nameInput.Size = UDim2.new(1, -48, 0, 18)
+        nameInput.Position = UDim2.new(0, 24, 0, 4)
+        nameInput.BackgroundTransparency = 1
+        nameInput.TextColor3 = Theme.TextGlow
+        nameInput.Font = Theme.FontBold
+        nameInput.TextSize = 11
+        nameInput.TextXAlignment = Enum.TextXAlignment.Left
+        nameInput.Parent = pFrame
+        
+        nameInput.FocusLost:Connect(function() pData.name = nameInput.Text renderPoints() end)
+        
+        local btnWidth = UDim2.new(0.31, 0, 0, 32)
+        local saveB = createNeonButton("S", Lang[c].save, UDim2.new(0, 4, 1, -36), btnWidth, pFrame, Theme.ButtonBg, Theme.NeonActive)
+        local tpB = createNeonButton("T", Lang[c].quick_tp, UDim2.new(0.35, 2, 1, -36), btnWidth, pFrame, Theme.ButtonBg, Theme.NeonGlow)
+        local autoB = createNeonButton("A", pData.autoTp and Lang[c].p_aut_on or Lang[c].p_aut, UDim2.new(0.68, 0, 1, -36), btnWidth, pFrame, Theme.ButtonBg, pData.autoTp and Theme.NeonActive or Theme.NeonGlow)
+        
+        saveB.TextSize = 9 tpB.TextSize = 9 autoB.TextSize = 9
+        if pData.autoTp then autoB.TextColor3 = Theme.NeonActive end
+        
+        saveB.MouseButton1Click:Connect(function() pData.cframe = getCurrentCFrame() end)
+        tpB.MouseButton1Click:Connect(function() if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = pData.cframe end end)
+        autoB.MouseButton1Click:Connect(function() pData.autoTp = not pData.autoTp renderPoints() end)
+        pFrame.Parent = PointsScroll
     end
-    
-    LangLabel.Text = isEng and "Menu Language:" or "Язык интерфейса:"
-    BindLabel.Text = isEng and "Menu Hide Hotkey:" or "Клавиша скрытия:"
-    MethodLabel.Text = isEng and "Movement Method:" or "Метод перемещения:"
-    SliderSpeedLabel.Text = isEng and "Fly Move Speed:" or "Скорость полёта:"
-    SliderDistLabel.Text = isEng and "TpFly Dash Distance:" or "Дальность TpFly:"
-    SliderDelayLabel.Text = isEng and "TpFly Tick Delay:" or "Интервал TpFly:"
-    FileNameLabel.Text = isEng and "Database File Name:" or "Имя файла базы:"
-    
-    SaveLabel.Text = isEng and "Save Configuration:" or "Сохранить профиль:"
-    LoadLabel.Text = isEng and "Load Configuration:" or "Загрузить профиль:"
-    SaveFileBtn.Text = isEng and "SAVE" or "СОХРАНИТЬ"
-    LoadFileBtn.Text = isEng and "LOAD" or "ЗАГРУЗИТЬ"
-    BindBtn.Text = currentKeyBind.Name:upper()
-    
-    for _, node in ipairs(rowContainer) do
-        node.SaveRef.Text = isEng and "SAVE" or "СОХРАНИТЬ"
-    end
-end
-
-local function createWaypointRow(savedName, savedPos, savedAuto)
-    local RowFrame = Instance.new("Frame", ScrollContainer)
-    RowFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
-    RowFrame.ZIndex = 4
-    Instance.new("UICorner", RowFrame).CornerRadius = UDim.new(0, 6)
-    
-    local DeleteBtn = Instance.new("TextButton", RowFrame)
-    DeleteBtn.Size = UDim2.new(0.08, 0, 0.7, 0)
-    DeleteBtn.Position = UDim2.new(0.02, 0, 0.15, 0)
-    DeleteBtn.BackgroundColor3 = Color3.fromRGB(50, 20, 30)
-    DeleteBtn.Text = "✕"
-    DeleteBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-    DeleteBtn.Font = Enum.Font.GothamBold
-    DeleteBtn.TextSize = 10
-    DeleteBtn.ZIndex = 5
-    Instance.new("UICorner", DeleteBtn).CornerRadius = UDim.new(0, 4)
-    
-    local NameBox = Instance.new("TextBox", RowFrame)
-    NameBox.Size = UDim2.new(0.30, 0, 0.7, 0)
-    NameBox.Position = UDim2.new(0.12, 0, 0.15, 0)
-    NameBox.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-    NameBox.Text = savedName or "Точка " .. (#rowContainer + 1)
-    NameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    NameBox.TextSize = 9
-    NameBox.Font = Enum.Font.GothamBold
-    NameBox.ZIndex = 5
-    Instance.new("UICorner", NameBox).CornerRadius = UDim.new(0, 4)
-    
-    local SaveBtn = Instance.new("TextButton", RowFrame)
-    SaveBtn.Size = UDim2.new(0.22, 0, 0.7, 0)
-    SaveBtn.Position = UDim2.new(0.44, 0, 0.15, 0)
-    SaveBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-    SaveBtn.Text = (currentLanguage == "ENG") and "SAVE" or "СОХРАНИТЬ"
-    SaveBtn.TextColor3 = Color3.fromRGB(0, 180, 120)
-    SaveBtn.Font = Enum.Font.GothamBold
-    SaveBtn.TextSize = 8
-    SaveBtn.ZIndex = 5
-    Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0, 4)
-    Instance.new("UIStroke", SaveBtn).Color = Color3.fromRGB(60, 45, 80)
-    
-    local TpBtn = Instance.new("TextButton", RowFrame)
-    TpBtn.Size = UDim2.new(0.14, 0, 0.7, 0)
-    TpBtn.Position = UDim2.new(0.68, 0, 0.15, 0)
-    TpBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-    TpBtn.Text = "ТП"
-    TpBtn.TextColor3 = Color3.fromRGB(157, 78, 221)
-    TpBtn.Font = Enum.Font.GothamBold
-    TpBtn.TextSize = 9
-    TpBtn.ZIndex = 5
-    Instance.new("UICorner", TpBtn).CornerRadius = UDim.new(0, 4)
-    Instance.new("UIStroke", TpBtn).Color = Color3.fromRGB(60, 45, 80)
-
-    local ToggleListBtn = Instance.new("TextButton", RowFrame)
-    ToggleListBtn.Size = UDim2.new(0.14, 0, 0.7, 0)
-    ToggleListBtn.Position = UDim2.new(0.84, 0, 0.15, 0)
-    ToggleListBtn.ZIndex = 5
-    
-    local autoInc = (savedAuto ~= nil) and savedAuto or true
-    local function updateRowToggleVisual()
-        ToggleListBtn.Text = autoInc and "ON" or "OFF"
-        ToggleListBtn.BackgroundColor3 = autoInc and Color3.fromRGB(0, 140, 255) or Color3.fromRGB(40, 40, 50)
-        ToggleListBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    end
-    updateRowToggleVisual()
-    Instance.new("UICorner", ToggleListBtn).CornerRadius = UDim.new(0, 4)
-    
-    local dataNode = { Position = savedPos, Name = NameBox.Text, AutoInclude = autoInc, FrameRef = RowFrame, SaveRef = SaveBtn }
-    table.insert(rowContainer, dataNode)
-    RowFrame.LayoutOrder = #rowContainer
-    
-    NameBox:GetPropertyChangedSignal("Text"):Connect(function() dataNode.Name = NameBox.Text end)
---4
 --5
-    local methods = {"TP", "FLY", "TPFLY"}
-    MethodBtn.MouseButton1Click:Connect(function()
-        local cur = table.find(methods, _G.WaypointsSettings.Method) or 1
-        local nextIdx = (cur % #methods) + 1
-        _G.WaypointsSettings.Method = methods[nextIdx]
-        MethodBtn.Text = _G.WaypointsSettings.Method
-    end)
-
-    local function navigateCharacter(targetPos)
-        local char = localPlayer.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        if not root then return end
-        local method = _G.WaypointsSettings.Method
-        if method == "TP" then
-            root.CFrame = CFrame.new(targetPos)
-        elseif method == "FLY" then
-            _G.WaypointsSettings.IsMoving = true
-            local speed = _G.WaypointsSettings.FlySpeed or 50
-            while (root.Position - targetPos).Magnitude > 2 and _G.WaypointsSettings.IsMoving and _G.WaypointsSettings.AutoActive do
-                local direction = (targetPos - root.Position).Unit
-                root.AssemblyLinearVelocity = direction * speed
-                RunService.Heartbeat:Wait()
-            end
-            root.AssemblyLinearVelocity = Vector3.new(0,0,0)
-            if _G.WaypointsSettings.AutoActive then root.CFrame = CFrame.new(targetPos) end
-            _G.WaypointsSettings.IsMoving = false
-        elseif method == "TPFLY" then
-            _G.WaypointsSettings.IsMoving = true
-            local maxStep = _G.WaypointsSettings.TpFlyDist or 10
-            local stepDelay = _G.WaypointsSettings.TpFlyDelay or 0.05
-            while (root.Position - targetPos).Magnitude > 0.5 and _G.WaypointsSettings.IsMoving and _G.WaypointsSettings.AutoActive do
-                local remaining = targetPos - root.Position
-                local currentStep = remaining.Unit * math.min(maxStep, remaining.Magnitude)
-                root.CFrame = root.CFrame + currentStep
-                root.AssemblyLinearVelocity = Vector3.new(0,0,0)
-                task.wait(stepDelay)
-            end
-            if _G.WaypointsSettings.AutoActive then root.CFrame = CFrame.new(targetPos) end
-            _G.WaypointsSettings.IsMoving = false
-        end
-    end
-
-    SaveBtn.MouseButton1Click:Connect(function()
-        local char = localPlayer.Character
-        local root = char and char:FindFirstChild("HumanoidRootPart")
-        if root then
-            dataNode.Position = root.Position
-            dataNode.Name = NameBox.Text
-            SaveBtn.Text = (currentLanguage == "ENG") and "DONE" or "ЗАПИСАНО"
-            SaveBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 50)
-            task.wait(0.4)
-            SaveBtn.Text = (currentLanguage == "ENG") and "SAVE" or "СОХРАНИТЬ"
-            SaveBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
-        end
-    end)
---5
---6
-    TpBtn.MouseButton1Click:Connect(function()
-        if dataNode.Position then
-            local oldAuto = _G.WaypointsSettings.AutoActive
-            _G.WaypointsSettings.AutoActive = true
-            navigateCharacter(dataNode.Position)
-            _G.WaypointsSettings.AutoActive = oldAuto
-        else
-            TpBtn.Text = (currentLanguage == "ENG") and "EMPTY" or "ПУСТО"
-            task.wait(0.4)
-            TpBtn.Text = "ТП"
-        end
-    end)
-
-    ToggleListBtn.MouseButton1Click:Connect(function()
-        autoInc = not autoInc
-        dataNode.AutoInclude = autoInc
-        updateRowToggleVisual()
-    end)
-
-    DeleteBtn.MouseButton1Click:Connect(function()
-        for idx, node in ipairs(rowContainer) do
-            if node == dataNode then table.remove(rowContainer, idx) break end
-        end
-        RowFrame:Destroy()
-        updateScrollCanvas()
-    end)
+    local AddPointBtn = Instance.new("TextButton")
+    AddPointBtn.Name = "AddPointBtn"
+    AddPointBtn.Text = "+"
+    AddPointBtn.BackgroundColor3 = Theme.AddBtnBg
+    AddPointBtn.TextColor3 = Theme.TextLight
+    AddPointBtn.Font = Theme.FontBold
+    AddPointBtn.TextSize = 22
+    AddPointBtn.BorderSizePixel = 0
+    local addCorner = Instance.new("UICorner") addCorner.CornerRadius = UDim.new(0, 4) addCorner.Parent = AddPointBtn
+    addNeonStroke(AddPointBtn, Color3.fromRGB(110, 110, 115), 1)
     
-    AddPointBtn.Parent = nil
-    AddPointBtn.Parent = ScrollContainer
-    updateScrollCanvas()
+    AddPointBtn.MouseButton1Click:Connect(function()
+        table.insert(pointsList, {id = os.clock(), name = (Lang.current == "RU" and "Точка " or "Point ") .. (#pointsList + 1), cframe = getCurrentCFrame(), autoTp = false})
+        renderPoints()
+    end)
+    AddPointBtn.Parent = PointsScroll
+    updateGridLayout()
 end
 
-createWaypointRow(nil, nil, true)
-AddPointBtn.MouseButton1Click:Connect(function()
-    createWaypointRow(nil, nil, true)
-end)
-LangBtn.MouseButton1Click:Connect(function()
-    currentLanguage = (currentLanguage == "RUS") and "ENG" or "RUS"
-    updateLocalization()
-end)
-BindBtn.MouseButton1Click:Connect(function()
-    isBindingKey = true
-    BindBtn.Text = (currentLanguage == "ENG") and "PRESS ANY KEY..." or "НАЖМИТЕ КЛАВИШУ..."
-end)
-
-SaveFileBtn.MouseButton1Click:Connect(function()
-    if pcall(function() return writefile end) then
-        local rawTable = {}
-        for _, node in ipairs(rowContainer) do
-            if node.Position then
-                table.insert(rawTable, {
-                    Name = node.Name,
-                    AutoInclude = node.AutoInclude,
-                    Pos = {node.Position.X, node.Position.Y, node.Position.Z}
-                })
-            end
-        end
-        if pcall(function() return makefolder end) then
-            pcall(function() makefolder("WaypointsV4MyHuB") end)
-        end
-        local fName = (FileNameBox.Text ~= "") and FileNameBox.Text or "waypoints"
-        writefile("WaypointsV4MyHuB/" .. fName .. ".json", HttpService:JSONEncode(rawTable))
-        SaveFileBtn.Text = (currentLanguage == "ENG") and "SAVED!" or "СОХРАНЕНО!"
-        task.wait(0.5)
-        updateLocalization()
+UserInputService.InputChanged:Connect(function(input)
+    if draggingFrame and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local scrollPos = PointsScroll.AbsolutePosition
+        draggingFrame.Position = UDim2.new(0, input.Position.X - scrollPos.X - (draggingFrame.AbsoluteSize.X / 2), 0, input.Position.Y - scrollPos.Y - 15)
     end
 end)
 
-LoadFileBtn.MouseButton1Click:Connect(function()
-    local fName = (FileNameBox.Text ~= "") and FileNameBox.Text or "waypoints"
-    local fullPath = "WaypointsV4MyHuB/" .. fName .. ".json"
-    if pcall(function() return readfile end) and isfile(fullPath) then
-        local status, data = pcall(function() return HttpService:JSONDecode(readfile(fullPath)) end)
-        if status and data then
-            for _, node in ipairs(rowContainer) do
-                if node.FrameRef then node.FrameRef:Destroy() end
-            end
-            rowContainer = {}
-            for _, rawNode in ipairs(data) do
-                local p = rawNode.Pos
-                if p and #p == 3 then
-                    createWaypointRow(rawNode.Name, Vector3.new(p, p, p), rawNode.AutoInclude)
-                end
-            end
-            LoadFileBtn.Text = (currentLanguage == "ENG") and "LOADED!" or "ЗАГРУЖЕНО!"
+UserInputService.InputEnded:Connect(function(input)
+    if draggingFrame and (input == activeGripInput or input.UserInputType == Enum.UserInputType.MouseButton1) then
+        local frames = {}
+        for _, child in pairs(PointsScroll:GetChildren()) do
+            if child:IsA("Frame") and child ~= draggingFrame then table.insert(frames, child) end
         end
-        task.wait(0.5)
-        updateLocalization()
+        table.sort(frames, function(a, b) return a.AbsolutePosition.Y < b.AbsolutePosition.Y end)
+        local mousePos = UserInputService:GetMouseLocation()
+        local insertIdx = #frames + 1
+        for i, f in ipairs(frames) do
+            if mousePos.Y < f.AbsolutePosition.Y + (f.AbsoluteSize.Y / 2) then insertIdx = i break end
+        end
+        local currentIdx = table.find(PointsScroll:GetChildren(), draggingFrame)
+        if currentIdx then
+            local item = table.remove(pointsList, currentIdx)
+            if insertIdx > currentIdx then insertIdx = insertIdx - 1 end
+            table.insert(pointsList, math.clamp(insertIdx, 1, #pointsList + 1), item)
+        end
+        draggingFrame.ZIndex = 1
+        draggingFrame = nil
+        activeGripInput = nil
+        UIGridLayout.Enabled = true
+        renderPoints()
     end
 end)
 
 task.spawn(function()
     while true do
-        task.wait(0.05)
-        if _G.WaypointsSettings.AutoActive then
-            local snapshot = {}
-            for _, node in ipairs(rowContainer) do
-                table.insert(snapshot, node)
-            end
-            for _, currentPoint in ipairs(snapshot) do
-                if not _G.WaypointsSettings.AutoActive then break end
-                if currentPoint and currentPoint.Position and currentPoint.AutoInclude then
-                    local char = localPlayer.Character
+        task.wait(0.01)
+        if autoTpEnabled and #pointsList > 0 then
+            for _, pData in ipairs(pointsList) do
+                if autoTpEnabled and pData.autoTp then
+                    local char = LocalPlayer.Character
                     local root = char and char:FindFirstChild("HumanoidRootPart")
                     if root then
-                        root.CFrame = CFrame.new(currentPoint.Position)
+                        if Config.method == "Tp" then
+                            root.CFrame = pData.cframe
+                        elseif Config.method == "Fly" then
+                            local dist = (root.Position - pData.cframe.Position).Magnitude
+                            lerpMove(pData.cframe, dist / math.max(1, Config.flySpeed))
+                        elseif Config.method == "Fly tp" then
+                            stepMove(pData.cframe, Config.flyTpRange, Config.flyTpInterval)
+                        end
                     end
-                    task.wait(tonumber(IntervalBox.Text) or 0.5)
+                    if autoTpInterval > 0 and autoTpEnabled then task.wait(autoTpInterval) end
                 end
             end
         end
     end
 end)
+--6
+local ResizeTrigger = Instance.new("ImageLabel")
+ResizeTrigger.Name = "ResizeTrigger"
+ResizeTrigger.Size = UDim2.new(0, 16, 0, 16)
+ResizeTrigger.Position = UDim2.new(1, -16, 1, -16)
+ResizeTrigger.BackgroundTransparency = 1
+ResizeTrigger.Image = "rbxassetid://6031302940"
+ResizeTrigger.ImageColor3 = Theme.NeonGlow
+ResizeTrigger.ZIndex = 5
+ResizeTrigger.Parent = ContentFrame
 
-AutoTpBtn.MouseButton1Click:Connect(function()
-    _G.WaypointsSettings.AutoActive = not _G.WaypointsSettings.AutoActive
-    if not _G.WaypointsSettings.AutoActive then _G.WaypointsSettings.IsMoving = false end
+local startMousePos, startFrameSize
+ResizeTrigger.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 and not collapsed then
+        isResizing = true
+        startMousePos = input.Position
+        startFrameSize = OutlineFrame.Size
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if isResizing and input.UserInputType == Enum.UserInputType.MouseMovement and not collapsed then
+        local delta = input.Position - startMousePos
+        local newWidth = math.clamp(startFrameSize.X.Offset + delta.X, 340, 1200)
+        local newHeight = math.clamp(startFrameSize.Y.Offset + delta.Y, 180, 800)
+        OutlineFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
+        savedExpandedHeight = newHeight
+        savedExpandedWidth = newWidth
+        PointsScroll.Size = UDim2.new(1, -20, 1, -65)
+        updateGridLayout()
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then isResizing = false end
+end)
+
+OutlineFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateGridLayout)
+
+local SettingsScroll = Instance.new("ScrollingFrame")
+SettingsScroll.Size = UDim2.new(1, 0, 1, 0)
+SettingsScroll.BackgroundTransparency = 1
+SettingsScroll.Visible = false
+SettingsScroll.ScrollBarThickness = 4
+SettingsScroll.ScrollingEnabled = true
+SettingsScroll.ClipsDescendants = true
+SettingsScroll.ScrollBarImageColor3 = Theme.NeonGlow
+SettingsScroll.CanvasSize = UDim2.new(0, 0, 0, 360)
+SettingsScroll.Parent = ContentFrame
+
+local ConfigGroup = Instance.new("Frame")
+ConfigGroup.Size = UDim2.new(1, -20, 0, 115)
+ConfigGroup.Position = UDim2.new(0, 10, 0, 10)
+ConfigGroup.BackgroundColor3 = Theme.GroupBg
+ConfigGroup.BorderSizePixel = 0
+ConfigGroup.Parent = SettingsScroll
+local cgCorner = Instance.new("UICorner") cgCorner.CornerRadius = UDim.new(0, 4) cgCorner.Parent = ConfigGroup
+addNeonStroke(ConfigGroup, Theme.NeonGlow, 1)
+
+local ConfigHeader = Instance.new("TextLabel")
+ConfigHeader.Text = "КОНФИГУРАЦИЯ"
+ConfigHeader.Size = UDim2.new(1, -20, 0, 20)
+ConfigHeader.Position = UDim2.new(0, 10, 0, 5)
+ConfigHeader.BackgroundTransparency = 1
+ConfigHeader.TextColor3 = Theme.TextGlow
+ConfigHeader.Font = Theme.FontBold
+ConfigHeader.TextSize = 11
+ConfigHeader.TextXAlignment = Enum.TextXAlignment.Left
+ConfigHeader.Parent = ConfigGroup
+
+local ConfigInput = Instance.new("TextBox")
+ConfigInput.Text = Config.selectedConfigName
+ConfigInput.Position = UDim2.new(0, 10, 0, 30)
+ConfigInput.Size = UDim2.new(1, -20, 0, 30)
+ConfigInput.BackgroundColor3 = Theme.InputBg
+ConfigInput.TextColor3 = Theme.TextLight
+ConfigInput.BorderSizePixel = 0
+ConfigInput.Font = Theme.FontRegular
+ConfigInput.TextSize = 13
+ConfigInput.Parent = ConfigGroup
+local ciCorner = Instance.new("UICorner") ciCorner.CornerRadius = UDim.new(0, 4) ciCorner.Parent = ConfigInput
+addNeonStroke(ConfigInput, Theme.NeonGlow, 1)
+
+ConfigInput.FocusLost:Connect(function() Config.selectedConfigName = ConfigInput.Text ~= "" and ConfigInput.Text or "Default" end)
+local LoadBtn = createNeonButton("LoadBtn", "Загрузить", UDim2.new(0, 10, 0, 70), UDim2.new(0.5, -15, 0, 35), ConfigGroup)
+local SaveBtn = createNeonButton("SaveBtn", "Выгрузить", UDim2.new(0.5, 5, 0, 70), UDim2.new(0.5, -15, 0, 35), ConfigGroup)
+--7
+SaveBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local dataToSave = {}
+        for _, p in ipairs(pointsList) do table.insert(dataToSave, {name = p.name, autoTp = p.autoTp, pos = {p.cframe.X, p.cframe.Y, p.cframe.Z}}) end
+        writefile(Config.selectedConfigName .. "_movement.txt", HttpService:JSONEncode(dataToSave))
+    end)
+end)
+
+local SettingsFrame = SettingsScroll
+
+LoadBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local fileName = Config.selectedConfigName .. "_movement.txt"
+        if isfile(fileName) then
+            local loadedData = HttpService:JSONDecode(readfile(fileName))
+            table.clear(pointsList)
+            for _, p in ipairs(loadedData) do 
+                table.insert(pointsList, {id = os.clock(), name = p.name, autoTp = p.autoTp, cframe = CFrame.new(p.pos[1], p.pos[2], p.pos[3])}) 
+            end
+            renderPoints()
+        end
+    end)
+end)
+
+local MethodGroup = Instance.new("Frame")
+MethodGroup.Size = UDim2.new(1, -20, 0, 150)
+MethodGroup.Position = UDim2.new(0, 10, 0, 135)
+MethodGroup.BackgroundColor3 = Theme.GroupBg
+MethodGroup.BorderSizePixel = 0
+MethodGroup.Parent = SettingsFrame
+local mgCorner = Instance.new("UICorner") mgCorner.CornerRadius = UDim.new(0, 4) mgCorner.Parent = MethodGroup
+addNeonStroke(MethodGroup, Theme.NeonGlow, 1)
+
+local MethodHeader = Instance.new("TextLabel")
+MethodHeader.Text = "РЕЖИМ ДВИЖЕНИЯ"
+MethodHeader.Size = UDim2.new(1, -20, 0, 20)
+MethodHeader.Position = UDim2.new(0, 10, 0, 5)
+MethodHeader.BackgroundTransparency = 1
+MethodHeader.TextColor3 = Theme.TextGlow
+MethodHeader.Font = Theme.FontBold
+MethodHeader.TextSize = 11
+MethodHeader.TextXAlignment = Enum.TextXAlignment.Left
+MethodHeader.Parent = MethodGroup
+
+local SplitContainer = Instance.new("Frame")
+SplitContainer.Size = UDim2.new(1, -20, 0, 35)
+SplitContainer.Position = UDim2.new(0, 10, 0, 30)
+SplitContainer.BackgroundTransparency = 1
+SplitContainer.Parent = MethodGroup
+
+local BtnTp = createNeonButton("BtnTp", "Tp", UDim2.new(0, 0, 0, 0), UDim2.new(0.31, 0, 1, 0), SplitContainer)
+local BtnFly = createNeonButton("BtnFly", "Fly", UDim2.new(0.34, 2, 0, 0), UDim2.new(0.31, 0, 1, 0), SplitContainer)
+local BtnFlyTp = createNeonButton("BtnFlyTp", "Fly tp", UDim2.new(0.68, 0, 0, 0), UDim2.new(0.32, 0, 1, 0), SplitContainer)
+
+local DynamicSettings = Instance.new("Frame")
+DynamicSettings.Size = UDim2.new(1, -20, 0, 70)
+DynamicSettings.Position = UDim2.new(0, 10, 0, 75)
+DynamicSettings.BackgroundTransparency = 1
+DynamicSettings.Parent = MethodGroup
+
+local function createInputRow(label, defaultVal, pos, parent)
+    local frame = Instance.new("Frame") frame.Size = UDim2.new(1, 0, 0, 30) frame.Position = pos frame.BackgroundTransparency = 1 frame.Parent = parent
+    local lbl = Instance.new("TextLabel") lbl.Text = label lbl.Size = UDim2.new(0.6, 0, 1, 0) lbl.TextColor3 = Theme.TextGlow lbl.BackgroundTransparency = 1 lbl.Font = Theme.FontRegular lbl.TextSize = 12 lbl.TextXAlignment = Enum.TextXAlignment.Left lbl.Parent = frame
+    local box = Instance.new("TextBox") box.Text = tostring(defaultVal) box.Size = UDim2.new(0.4, 0, 1, -6) box.Position = UDim2.new(0.6, 0, 0, 3) box.BackgroundColor3 = Theme.InputBg box.TextColor3 = Theme.TextLight box.BorderSizePixel = 0 box.Font = Theme.FontBold box.TextSize = 12 box.Parent = frame
+    local bCorner = Instance.new("UICorner") bCorner.CornerRadius = UDim.new(0, 4) bCorner.Parent = box
+    addNeonStroke(box, Theme.NeonGlow, 1)
+    return box
+end
+--8
+local function updateMethodVisuals()
+    BtnTp.TextColor3 = Config.method == "Tp" and Theme.NeonActive or Theme.TextLight
+    BtnFly.TextColor3 = Config.method == "Fly" and Theme.NeonActive or Theme.TextLight
+    BtnFlyTp.TextColor3 = Config.method == "Fly tp" and Theme.NeonActive or Theme.TextLight
+    
+    local dChildren = DynamicSettings:GetChildren()
+    for _, c in ipairs(dChildren) do
+        TweenService:Create(c, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+    end
+    task.wait(0.15)
+    DynamicSettings:ClearAllChildren()
+
+    if Config.method == "Fly" then
+        local speedBox = createInputRow(Lang[Lang.current].speed, Config.flySpeed, UDim2.new(0, 0, 0, 5), DynamicSettings)
+        speedBox:GetPropertyChangedSignal("Text"):Connect(function() Config.flySpeed = tonumber(speedBox.Text) or Config.flySpeed end)
+    elseif Config.method == "Fly tp" then
+        local rangeBox = createInputRow(Lang[Lang.current].range, Config.flyTpRange, UDim2.new(0, 0, 0, 5), DynamicSettings)
+        local intervalBox = createInputRow(Lang[Lang.current].freq_fly, Config.flyTpInterval, UDim2.new(0, 0, 0, 35), DynamicSettings)
+        rangeBox:GetPropertyChangedSignal("Text"):Connect(function() Config.flyTpRange = tonumber(rangeBox.Text) or Config.flyTpRange end)
+        intervalBox:GetPropertyChangedSignal("Text"):Connect(function() Config.flyTpInterval = tonumber(intervalBox.Text) or Config.flyTpInterval end)
+    end
+end
+
+BtnTp.MouseButton1Click:Connect(function() Config.method = "Tp" updateMethodVisuals() end)
+BtnFly.MouseButton1Click:Connect(function() Config.method = "Fly" updateMethodVisuals() end)
+BtnFlyTp.MouseButton1Click:Connect(function() Config.method = "Fly tp" updateMethodVisuals() end)
+
+local LangBtn = createNeonButton("LangBtn", "Язык: RU", UDim2.new(0, 10, 0, 295), UDim2.new(0.5, -15, 0, 35), SettingsFrame)
+local BindBtn = createNeonButton("BindBtn", "Скрыть: Insert", UDim2.new(0.5, 5, 0, 295), UDim2.new(0.5, -15, 0, 35), SettingsFrame, Theme.ButtonBg, Theme.NeonGlow)
+local isBinding = false
+
+local function updateLocalization()
+    local p = Lang.current
+    TpMenuBtn.Text = Lang[p].tp
+    IntervalLabel.Text = Lang[p].freq
+    ConfigInput.PlaceholderText = Lang[p].placeholder
+    LoadBtn.Text = Lang[p].load
+    SaveBtn.Text = Lang[p].export
+    LangBtn.Text = Lang[p].lang
+    ConfigHeader.Text = Lang[p].cfg_header
+    MethodHeader.Text = Lang[p].method_header
+    BindBtn.Text = isBinding and "..." or (p == "RU" and "Скрыть: " or "Hide: ") .. currentBind.Name
+    AutoTpBtn.Text = autoTpEnabled and Lang[p].auto_on or Lang[p].auto_off
+    updateMethodVisuals()
+    renderPoints()
+end
+
+LangBtn.MouseButton1Click:Connect(function()
+    Lang.current = Lang.current == "RU" and "EN" or "RU"
     updateLocalization()
 end)
 
-local dragToggle, dragStart, startPos = false, Vector3.new(), UDim2.new()
-Header.InputBegan:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and not UserInputService:GetFocusedTextBox() then
-        if input.Position.X < Header.AbsolutePosition.X + Header.AbsoluteSize.X - 50 then
-            dragToggle = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-        end
-    end
-end)
+BindBtn.MouseButton1Click:Connect(function() isBinding = true BindBtn.Text = "..." end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragToggle = false
-    end
-end)
-
-local ResizeIcon = Instance.new("Frame", MainFrame)
-ResizeIcon.Size = UDim2.new(0, 12, 0, 12)
-ResizeIcon.Position = UDim2.new(1, -12, 1, -12)
-ResizeIcon.BackgroundColor3 = Color3.fromRGB(157, 78, 221)
-ResizeIcon.BorderSizePixel = 0
-ResizeIcon.ZIndex = 200
-Instance.new("UICorner", ResizeIcon).CornerRadius = UDim.new(0, 3)
-
-local resizing = false
-local resizeStartPos = Vector3.new()
-local startSize = UDim2.new()
-
-ResizeIcon.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing = true
-        resizeStartPos = input.Position
-        startSize = MainFrame.Size
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - resizeStartPos
-        local newWidth = math.clamp(startSize.X.Offset + delta.X, 280, 600)
-        local newHeight = math.clamp(startSize.Y.Offset + delta.Y, 300, 700)
-        MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-        updateScrollCanvas()
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing = false
-    end
-end)
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if isBindingKey then
-        if input.UserInputType == Enum.UserInputType.Keyboard then
-            currentKeyBind = input.KeyCode
-            isBindingKey = false
-            updateLocalization()
-        end
+UserInputService.InputBegan:Connect(function(input, processed)
+    if isBinding and input.UserInputType == Enum.UserInputType.Keyboard then
+        currentBind = input.KeyCode
+        isBinding = false
+        updateLocalization()
         return
     end
-    if gameProcessed then return end
-    if input.KeyCode == currentKeyBind then
-        MainFrame.Visible = not MainFrame.Visible
+    if not processed and input.KeyCode == currentBind then
+        OutlineFrame.Visible = not OutlineFrame.Visible
+    end
+end)
+--9
+local ConfirmFrame = Instance.new("Frame")
+ConfirmFrame.Size = UDim2.new(0, 240, 0, 120)
+ConfirmFrame.Position = UDim2.new(0.5, -120, 0.5, -60)
+ConfirmFrame.BackgroundColor3 = Theme.MainBg
+ConfirmFrame.BorderSizePixel = 0
+ConfirmFrame.Visible = false
+ConfirmFrame.ZIndex = 10
+ConfirmFrame.Parent = ScreenGui
+local cfCorner = Instance.new("UICorner") cfCorner.CornerRadius = UDim.new(0, 6) cfCorner.Parent = ConfirmFrame
+addNeonStroke(ConfirmFrame, Theme.NeonAlert, 2)
+
+local ConfirmTitle = Instance.new("TextLabel")
+ConfirmTitle.Text = "Закрыть чит?"
+ConfirmTitle.Size = UDim2.new(1, 0, 0, 40)
+ConfirmTitle.BackgroundTransparency = 1
+ConfirmTitle.TextColor3 = Theme.TextLight
+ConfirmTitle.Font = Theme.FontBold
+ConfirmTitle.TextSize = 14
+ConfirmTitle.ZIndex = 10
+ConfirmTitle.Parent = ConfirmFrame
+
+local YesBtn = createNeonButton("YesBtn", "Да", UDim2.new(0, 20, 0, 60), UDim2.new(0, 90, 0, 35), ConfirmFrame, Theme.ButtonBg, Theme.NeonActive)
+local NoBtn = createNeonButton("NoBtn", "Нет", UDim2.new(1, -110, 0, 60), UDim2.new(0, 90, 0, 35), ConfirmFrame, Theme.ButtonBg, Theme.NeonAlert)
+YesBtn.ZIndex = 10 NoBtn.ZIndex = 10
+
+CloseUiBtn.MouseButton1Click:Connect(function()
+    ConfirmTitle.Text = Lang[Lang.current].confirm_title
+    YesBtn.Text = Lang[Lang.current].yes
+    NoBtn.Text = Lang[Lang.current].no
+    ConfirmFrame.Visible = true
+end)
+
+YesBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() ConfirmFrame:Destroy() end)
+NoBtn.MouseButton1Click:Connect(function() ConfirmFrame.Visible = false end)
+
+CollapseBtn.MouseButton1Click:Connect(function()
+    collapsed = not collapsed
+    CollapseBtn.Text = collapsed and "▼" or "▲"
+    
+    local targetWidth = collapsed and 76 or savedExpandedWidth
+    local targetHeight = collapsed and 40 or savedExpandedHeight
+    local targetContentHeight = collapsed and 0 or (savedExpandedHeight - 40)
+    
+    -- Смещение позиции по X влево при раскрытии и вправо при сжатии, чтобы правый край стоял на месте
+    local deltaWidth = savedExpandedWidth - 76
+    local currentOffsetX = OutlineFrame.Position.X.Offset
+    local targetOffsetX = collapsed and (currentOffsetX + deltaWidth) or (currentOffsetX - deltaWidth)
+    
+    TweenService:Create(OutlineFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(OutlineFrame.Size.X.Scale, targetWidth, OutlineFrame.Size.Y.Scale, targetHeight),
+        Position = UDim2.new(OutlineFrame.Position.X.Scale, targetOffsetX, OutlineFrame.Position.Y.Scale, OutlineFrame.Position.Y.Offset)
+    }):Play()
+    
+    TweenService:Create(ContentFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, targetContentHeight)}):Play()
+    TweenService:Create(TpMenuBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = collapsed and UDim2.new(0,0,0,0) or UDim2.new(0,100,0,30), TextTransparency = collapsed and 1 or 0}):Play()
+    TweenService:Create(SettingsMenuBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = collapsed and UDim2.new(0,0,0,0) or UDim2.new(0,35,0,30), TextTransparency = collapsed and 1 or 0}):Play()
+    
+    if collapsed then
+        CollapseBtn.Position = UDim2.new(0, 5, 0, 5)
+        CloseUiBtn.Position = UDim2.new(0, 40, 0, 5)
+    else
+        CollapseBtn.Position = UDim2.new(1, -75, 0, 5)
+        CloseUiBtn.Position = UDim2.new(1, -35, 0, 5)
     end
 end)
 
-local function safeConnect(signal, callback)
-    if signal then pcall(function() signal:Connect(callback) end) end
-end
+TpMenuBtn.MouseButton1Click:Connect(function()
+    if collapsed then return end
+    TweenService:Create(ContentFrame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+    task.wait(0.12)
+    TpFrame.Visible = true SettingsScroll.Visible = false
+    TweenService:Create(ContentFrame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, savedExpandedHeight - 40)}):Play()
+    updateGridLayout()
+end)
 
-safeConnect(GridGrip:GetPropertyChangedSignal("AbsoluteContentSize"), updateScrollCanvas)
-safeConnect(MainFrame:GetPropertyChangedSignal("Size"), updateScrollCanvas)
---6
+SettingsMenuBtn.MouseButton1Click:Connect(function()
+    if collapsed then return end
+    TweenService:Create(ContentFrame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+    task.wait(0.12)
+    TpFrame.Visible = false SettingsScroll.Visible = true
+    TweenService:Create(ContentFrame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, savedExpandedHeight - 40)}):Play()
+end)
+
+AutoTpBtn.MouseButton1Click:Connect(function()
+    autoTpEnabled = not autoTpEnabled
+    AutoTpBtn.Text = autoTpEnabled and Lang[Lang.current].auto_on or Lang[Lang.current].auto_off
+    addNeonStroke(AutoTpBtn, autoTpEnabled and Theme.NeonActive or Theme.NeonGlow, 1.2)
+    AutoTpBtn.TextColor3 = autoTpEnabled and Theme.NeonActive or Theme.TextLight
+end)
+
+updateMethodVisuals()
+renderPoints()
