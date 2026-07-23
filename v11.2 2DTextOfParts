@@ -1,0 +1,796 @@
+--"MatrixMainFrame"
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local camera = workspace.CurrentCamera
+local localPlayer = Players.LocalPlayer
+
+local TargetParent = nil
+pcall(function() TargetParent = game:GetService("CoreGui") end)
+if not TargetParent then pcall(function() TargetParent = game:GetService("RobloxGui") end) end
+if not TargetParent then TargetParent = localPlayer:WaitForChild("PlayerGui") end
+
+if TargetParent:FindFirstChild("RealMatrixConverter") then TargetParent["RealMatrixConverter"]:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RealMatrixConverter"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = TargetParent
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 310, 0, 410)
+MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 12, 22)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+
+local MainCorner = Instance.new("UICorner", MainFrame)
+MainCorner.CornerRadius = UDim.new(0, 10)
+local MainStroke = Instance.new("UIStroke", MainFrame)
+MainStroke.Color = Color3.fromRGB(157, 78, 221)
+MainStroke.Thickness = 1.5
+
+local Header = Instance.new("Frame", MainFrame)
+Header.Size = UDim2.new(1, 0, 0, 38)
+Header.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+Header.BorderSizePixel = 0
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel", Header)
+Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Position = UDim2.new(0, 14, 0, 0)
+Title.Text = "MATRIX CONVERTER v11.5"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 12
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.BackgroundTransparency = 1
+--1
+--"MatrixCoreButtons"
+local CloseBtn = Instance.new("TextButton", Header)
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.Position = UDim2.new(1, -34, 0, 7)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 30)
+CloseBtn.Text = ""
+CloseBtn.ZIndex = 12
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 5)
+local CloseStroke = Instance.new("UIStroke", CloseBtn)
+CloseStroke.Color = Color3.fromRGB(157, 78, 221)
+
+local Line1 = Instance.new("Frame", CloseBtn)
+Line1.Size = UDim2.new(0, 12, 0, 2)
+Line1.Position = UDim2.new(0.5, -6, 0.5, -1)
+Line1.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+Line1.BorderSizePixel = 0
+Line1.Rotation = 45
+
+local Line2 = Instance.new("Frame", CloseBtn)
+Line2.Size = UDim2.new(0, 12, 0, 2)
+Line2.Position = UDim2.new(0.5, -6, 0.5, -1)
+Line2.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+Line2.BorderSizePixel = 0
+Line2.Rotation = -45
+
+local ToggleBtn = Instance.new("TextButton", MainFrame)
+ToggleBtn.Position = UDim2.new(0.05, 0, 0, 48)
+ToggleBtn.Size = UDim2.new(0.9, 0, 0, 26)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
+ToggleBtn.Text = "ВКЛЮЧИТЬ СБОР БЛОКОВ"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 10
+ToggleBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 6)
+
+local AnchorBtn = Instance.new("TextButton", MainFrame)
+AnchorBtn.Position = UDim2.new(0.05, 0, 0, 78)
+AnchorBtn.Size = UDim2.new(0.9, 0, 0, 26)
+AnchorBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+AnchorBtn.Text = "ЗАФИКСИРОВАТЬ РИСУНОК"
+AnchorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AnchorBtn.TextSize = 10
+AnchorBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", AnchorBtn).CornerRadius = UDim.new(0, 6)
+
+local UnanchorBtn = Instance.new("TextButton", MainFrame)
+UnanchorBtn.Position = UDim2.new(0.05, 0, 0, 108)
+UnanchorBtn.Size = UDim2.new(0.9, 0, 0, 26)
+UnanchorBtn.BackgroundColor3 = Color3.fromRGB(230, 130, 0)
+UnanchorBtn.Text = "РАЗФИКСИРОВАТЬ ВСЁ В РАДИУСЕ"
+UnanchorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+UnanchorBtn.TextSize = 10
+UnanchorBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", UnanchorBtn).CornerRadius = UDim.new(0, 6)
+--2
+--"MatrixInputAndTabs"
+local MirrorBtn = Instance.new("TextButton", MainFrame)
+MirrorBtn.Position = UDim2.new(0.05, 0, 0, 138)
+MirrorBtn.Size = UDim2.new(0.9, 0, 0, 26)
+MirrorBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
+MirrorBtn.Text = "ОТЗЕРКАЛИТЬ ТЕКСТ: OFF"
+MirrorBtn.TextColor3 = Color3.fromRGB(157, 78, 221)
+MirrorBtn.TextSize = 10
+MirrorBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", MirrorBtn).CornerRadius = UDim.new(0, 6)
+local MirrorStroke = Instance.new("UIStroke", MirrorBtn)
+MirrorStroke.Color = Color3.fromRGB(60, 45, 80)
+
+local InputFrame = Instance.new("Frame", MainFrame)
+InputFrame.Size = UDim2.new(0.9, 0, 0, 26)
+InputFrame.Position = UDim2.new(0.05, 0, 0, 168)
+InputFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+Instance.new("UICorner", InputFrame).CornerRadius = UDim.new(0, 6)
+
+local InputLabel = Instance.new("TextLabel", InputFrame)
+InputLabel.Size = UDim2.new(0.3, 0, 1, 0)
+InputLabel.Position = UDim2.new(0.04, 0, 0, 0)
+InputLabel.BackgroundTransparency = 1
+InputLabel.Text = "Текст:"
+InputLabel.TextColor3 = Color3.fromRGB(180, 180, 190)
+InputLabel.TextSize = 10
+InputLabel.TextXAlignment = Enum.TextXAlignment.Left
+InputLabel.Font = Enum.Font.GothamSemibold
+
+local ContentBox = Instance.new("TextBox", InputFrame)
+ContentBox.Size = UDim2.new(0.62, 0, 0.75, 0)
+ContentBox.Position = UDim2.new(0.34, 0, 0.125, 0)
+ContentBox.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
+ContentBox.Text = ""
+ContentBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+ContentBox.TextSize = 10
+ContentBox.Font = Enum.Font.GothamBold
+Instance.new("UICorner", ContentBox).CornerRadius = UDim.new(0, 4)
+
+local TabBar = Instance.new("Frame", MainFrame)
+TabBar.Size = UDim2.new(0, 80, 0, 150)
+TabBar.Position = UDim2.new(0, 10, 0, 205)
+TabBar.BackgroundTransparency = 1
+local TabList = Instance.new("UIListLayout", TabBar)
+TabList.Padding = UDim.new(0, 4)
+
+local function CreateTabNav(text)
+    local btn = Instance.new("TextButton", TabBar)
+    btn.Size = UDim2.new(1, 0, 0, 28)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(130, 130, 150)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 9
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = Color3.fromRGB(60, 45, 80)
+    return btn, stroke
+end
+
+local TabTextBtn, TabTextStroke = CreateTabNav("ТЕКСТ")
+local TabResBtn, TabResStroke = CreateTabNav("РЕЗЕРВ")
+local TabSetBtn, TabSetStroke = CreateTabNav("SETTINGS")
+--3
+--4
+local PageContainer = Instance.new("Frame", MainFrame)
+PageContainer.Size = UDim2.new(0, 205, 0, 160)
+PageContainer.Position = UDim2.new(0, 95, 0, 205)
+PageContainer.BackgroundTransparency = 1
+
+local function CreatePageFrame()
+    local pf = Instance.new("ScrollingFrame", PageContainer)
+    pf.Size = UDim2.new(1, 0, 1, 0)
+    pf.BackgroundTransparency = 1
+    pf.Visible = false
+    pf.ScrollBarThickness = 2
+    pf.CanvasSize = UDim2.new(0, 0, 0, 0)
+    local layout = Instance.new("UIListLayout", pf)
+    layout.Padding = UDim.new(0, 4)
+    layout.GetPropertyChangedSignal(layout, "AbsoluteContentSize"):Connect(function()
+        pf.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+    end)
+    return pf
+end
+
+local TextPage = CreatePageFrame()
+local ReservePage = CreatePageFrame()
+local SettingsPage = CreatePageFrame()
+
+_G.MatrixSettings = { 
+    Distance = 300, GridScale = 1.0, BlockDensity = 1, FaceDistance = 3, Attraction = 15, MirrorActive = false, 
+    WaitCount = 9999, ReserveHeight = 10, ReserveXOffset = 0, ReserveZOffset = 0, 
+    TextYOffset = -3, TextZOffset = 0, ReserveColumns = 10, ReserveRowsMax = 5, ReserveSpacing = 2,
+    TextCollision = false, ReserveCollision = true, ReserveLayersMax = 3, LineSpacing = 6, Language = "RUS"
+}
+
+local function saveMatrixConfig()
+    if pcall(function() return writefile end) then
+        if pcall(function() return makefolder end) then pcall(function() makefolder("WaypointsV4MyHuB") end) end
+        writefile("WaypointsV4MyHuB/MatrixSettings.json", HttpService:JSONEncode(_G.MatrixSettings))
+    end
+end
+
+if pcall(function() return readfile end) and isfile("WaypointsV4MyHuB/MatrixSettings.json") then
+    local status, data = pcall(function() return HttpService:JSONDecode(readfile("WaypointsV4MyHuB/MatrixSettings.json")) end)
+    if status and data then
+        for key, value in pairs(data) do _G.MatrixSettings[key] = value end
+    end
+end
+
+local function createSlider(text, settingName, parentPage)
+    local SliderFrame = Instance.new("Frame", parentPage)
+    SliderFrame.Size = UDim2.new(1, -6, 0, 22)
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+    Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0, 5)
+    local Label = Instance.new("TextLabel", SliderFrame)
+    Label.Size = UDim2.new(0.65, 0, 1, 0)
+    Label.Position = UDim2.new(0.04, 0, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(180, 180, 190)
+    Label.TextSize = 9
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Font = Enum.Font.GothamSemibold
+    local Box = Instance.new("TextBox", SliderFrame)
+    Box.Size = UDim2.new(0.28, 0, 0.75, 0)
+    Box.Position = UDim2.new(0.68, 0, 0.125, 0)
+    Box.BackgroundColor3 = Color3.fromRGB(25, 22, 38)
+    Box.Text = tostring(_G.MatrixSettings[settingName])
+    Box.TextColor3 = Color3.fromRGB(157, 78, 221)
+    Box.TextSize = 9
+    Box.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+    
+    -- ИСПРАВЛЕНО: Отключена очистка текста при фокусе, старое число сохраняется для редактирования
+    Box.ClearTextOnFocus = false
+    
+    Box.FocusLost:Connect(function()
+        local num = tonumber(Box.Text)
+        if num then _G.MatrixSettings[settingName] = num; saveMatrixConfig() else Box.Text = tostring(_G.MatrixSettings[settingName]) end
+    end)
+    return Label, Box
+end
+--4
+
+--"MatrixSlidersList"
+local function createToggleSetting(text, settingName, parentPage)
+    local ToggleFrame = Instance.new("Frame", parentPage)
+    ToggleFrame.Size = UDim2.new(1, -6, 0, 24)
+    ToggleFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+    Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 5)
+    local Label = Instance.new("TextLabel", ToggleFrame)
+    Label.Size = UDim2.new(0.6, 0, 1, 0)
+    Label.Position = UDim2.new(0.04, 0, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(180, 180, 190)
+    Label.TextSize = 9
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Font = Enum.Font.GothamSemibold
+    local TglBtn = Instance.new("TextButton", ToggleFrame)
+    TglBtn.Size = UDim2.new(0.32, 0, 0.75, 0)
+    TglBtn.Position = UDim2.new(0.64, 0, 0.125, 0)
+    TglBtn.Font = Enum.Font.GothamBold
+    TglBtn.TextSize = 9
+    Instance.new("UICorner", TglBtn).CornerRadius = UDim.new(0, 4)
+    
+    local function updateVisual()
+        local active = _G.MatrixSettings[settingName]
+        local isEng = (_G.MatrixSettings.Language == "ENG")
+        TglBtn.Text = active and (isEng and "ON" or "ВКЛ") or (isEng and "OFF" or "ВЫКЛ")
+        TglBtn.BackgroundColor3 = active and Color3.fromRGB(0, 140, 255) or Color3.fromRGB(40, 40, 50)
+        TglBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+    updateVisual()
+    TglBtn.MouseButton1Click:Connect(function()
+        _G.MatrixSettings[settingName] = not _G.MatrixSettings[settingName]
+        updateVisual()
+        saveMatrixConfig()
+    end)
+    return Label, TglBtn
+end
+
+local lScan, bScan = createSlider("Радиус сканера:", "Distance", TextPage)
+local lFreq, bFreq = createSlider("Шаг сетки букв:", "GridScale", TextPage)
+local lDens, bDens = createSlider("Частота кубов:", "BlockDensity", TextPage)
+local lDist, bDist = createSlider("Дистанция от лица:", "FaceDistance", TextPage)
+local lOffY, bOffY = createSlider("Смещение Y текста:", "TextYOffset", TextPage)
+local lOffZ, bOffZ = createSlider("Смещение Z текста:", "TextZOffset", TextPage)
+local lLine, bLine = createSlider("Интервал строк:", "LineSpacing", TextPage)
+
+local lMax, bMax = createSlider("Макс. кубов (Лимит):", "WaitCount", ReservePage)
+local lResY, bResY = createSlider("Высота Y резерва:", "ReserveHeight", ReservePage)
+local lResX, bResX = createSlider("Смещение X резерва:", "ReserveXOffset", ReservePage)
+local lResZ, bResZ = createSlider("Смещение Z резерва:", "ReserveZOffset", ReservePage)
+local lCol, bCol = createSlider("Столбцов резерва:", "ReserveColumns", ReservePage)
+local lRow, bRow = createSlider("Макс. рядов резерва:", "ReserveRowsMax", ReservePage)
+local lLay, bLay = createSlider("Макс. слоёв резерва:", "ReserveLayersMax", ReservePage)
+local lSpc, bSpc = createSlider("Расстояние резерва:", "ReserveSpacing", ReservePage)
+
+local tColL, tColB = createToggleSetting("Коллизия Текста:", "TextCollision", SettingsPage)
+local rColL, rColB = createToggleSetting("Коллизия Резерва:", "ReserveCollision", SettingsPage)
+
+local LangFrame = Instance.new("Frame", SettingsPage)
+LangFrame.Size = UDim2.new(1, -6, 0, 24)
+LangFrame.BackgroundColor3 = Color3.fromRGB(22, 18, 32)
+Instance.new("UICorner", LangFrame).CornerRadius = UDim.new(0, 5)
+
+local LangLabel = Instance.new("TextLabel", LangFrame)
+LangLabel.Size = UDim2.new(0.6, 0, 1, 0)
+LangLabel.Position = UDim2.new(0.04, 0, 0, 0)
+LangLabel.BackgroundTransparency = 1
+LangLabel.Text = "Язык меню / Language:"
+LangLabel.TextColor3 = Color3.fromRGB(180, 180, 190)
+LangLabel.TextSize = 9
+LangLabel.TextXAlignment = Enum.TextXAlignment.Left
+LangLabel.Font = Enum.Font.GothamSemibold
+
+local LangBtn = Instance.new("TextButton", LangFrame)
+LangBtn.Size = UDim2.new(0.32, 0, 0.75, 0)
+LangBtn.Position = UDim2.new(0.64, 0, 0.125, 0)
+LangBtn.BackgroundColor3 = Color3.fromRGB(157, 78, 221)
+LangBtn.Text = "RUS"
+LangBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LangBtn.Font = Enum.Font.GothamBold
+LangBtn.TextSize = 9
+Instance.new("UICorner", LangBtn).CornerRadius = UDim.new(0, 4)
+--5
+--6
+local Footnote = Instance.new("TextLabel", MainFrame)
+Footnote.Size = UDim2.new(1, 0, 0, 20)
+Footnote.Position = UDim2.new(0, 0, 0, 385)
+Footnote.BackgroundTransparency = 1
+Footnote.Text = "Нажми [Insert] чтобы скрыть меню"
+Footnote.TextColor3 = Color3.fromRGB(100, 100, 120)
+Footnote.TextSize = 9
+Footnote.Font = Enum.Font.GothamMedium
+
+local function updateLanguageVisuals()
+    local isEng = (_G.MatrixSettings.Language == "ENG")
+    local matrixActive = _G.MatrixSettings.IsActive or false
+    LangBtn.Text = isEng and "ENG" or "RUS"
+    TabTextBtn.Text = isEng and "TEXT" or "ТЕКСТ"
+    TabResBtn.Text = isEng and "RESERVE" or "РЕЗЕРВ"
+    
+    lScan.Text = isEng and "Scanner Radius:" or "Радиус сканера:"
+    lFreq.Text = isEng and "Grid Scale Step:" or "Шаг сетки букв:"
+    lDens.Text = isEng and "Block Density:" or "Частота кубов:"
+    lDist.Text = isEng and "Face Distance:" or "Дистанция от лица:"
+    lOffY.Text = isEng and "Text Y Offset:" or "Смещение Y текста:"
+    lOffZ.Text = isEng and "Text Z Offset:" or "Смещение Z текста:"
+    lLine.Text = isEng and "Line Interval:" or "Интервал строк:"
+    
+    lMax.Text = isEng and "Max Blocks (Limit):" or "Макс. кубов (Лимит):"
+    lResY.Text = isEng and "Reserve Y Height:" or "Высота Y резерва:"
+    lResX.Text = isEng and "Reserve X Offset:" or "Смещение X резерва:"
+    lResZ.Text = isEng and "Reserve Z Offset:" or "Смещение Z резерва:"
+    lCol.Text = isEng and "Reserve Columns:" or "Столбцов резерва:"
+    lRow.Text = isEng and "Reserve Max Rows:" or "Макс. рядов резерва:"
+    lLay.Text = isEng and "Reserve Max Layers:" or "Макс. слоёв резерва:"
+    lSpc.Text = isEng and "Reserve Spacing:" or "Расстояние резерва:"
+    
+    tColL.Text = isEng and "Text Collision:" or "Коллизия Текста:"
+    rColL.Text = isEng and "Reserve Collision:" or "Коллизия Резерва:"
+    InputLabel.Text = isEng and "Text:" or "Текст:"
+    LangLabel.Text = isEng and "Menu Language:" or "Язык интерфейса:"
+    
+    AnchorBtn.Text = isEng and "LOCK PATTERN" or "ЗАФИКСИРОВАТЬ РИСУНОК"
+    UnanchorBtn.Text = isEng and "UNLOCK ALL IN RADIUS" or "РАЗФИКСИРОВАТЬ ВСЁ В РАДИУСЕ"
+    MirrorBtn.Text = _G.MatrixSettings.MirrorActive and (isEng and "MIRROR TEXT: ON" or "ОТЗЕРКАЛИТЬ ТЕКСТ: ON") or (isEng and "MIRROR TEXT: OFF" or "ОТЗЕРКАЛИТЬ ТЕКСТ: OFF")
+    Footnote.Text = isEng and "Press [Insert] to hide interface" or "Нажми [Insert] чтобы скрыть меню"
+    
+    tColB.Text = _G.MatrixSettings.TextCollision and (isEng and "ON" or "ВКЛ") or (isEng and "OFF" or "ВЫКЛ")
+    rColB.Text = _G.MatrixSettings.ReserveCollision and (isEng and "ON" or "ВКЛ") or (isEng and "OFF" or "ВЫКЛ")
+
+    -- ИСПРАВЛЕНО: Четкая динамическая перекраска кнопки в зависимости от глобального флага активности
+    if matrixActive then
+        ToggleBtn.Text = isEng and "DISABLE BLOCK COLLECTION" or "ВЫКЛЮЧИТЬ СБОР БЛОКОВ"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+    else
+        ToggleBtn.Text = isEng and "ENABLE BLOCK COLLECTION" or "ВКЛЮЧИТЬ СБОР БЛОКОВ"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 75)
+    end
+end
+
+LangBtn.MouseButton1Click:Connect(function()
+    _G.MatrixSettings.Language = (_G.MatrixSettings.Language == "RUS") and "ENG" or "RUS"
+    updateLanguageVisuals()
+    saveMatrixConfig()
+end)
+
+local function switchTab(tabIndex)
+    TextPage.Visible = (tabIndex == 1)
+    ReservePage.Visible = (tabIndex == 2)
+    SettingsPage.Visible = (tabIndex == 3)
+    TabTextBtn.TextColor3 = (tabIndex == 1) and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
+    TabTextStroke.Color = (tabIndex == 1) and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(60, 45, 80)
+    TabResBtn.TextColor3 = (tabIndex == 2) and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
+    TabResStroke.Color = (tabIndex == 2) and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(60, 45, 80)
+    TabSetBtn.TextColor3 = (tabIndex == 3) and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(130, 130, 150)
+    TabSetStroke.Color = (tabIndex == 3) and Color3.fromRGB(157, 78, 221) or Color3.fromRGB(60, 45, 80)
+end
+switchTab(1)
+updateLanguageVisuals()
+
+TabTextBtn.MouseButton1Click:Connect(function() switchTab(1) end)
+TabResBtn.MouseButton1Click:Connect(function() switchTab(2) end)
+TabSetBtn.MouseButton1Click:Connect(function() switchTab(3) end)
+--6
+
+--"MatrixFontDatabase"
+local dragToggle = nil
+local dragStart = nil
+local startPos = nil
+Header.InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and not UserInputService:GetFocusedTextBox() then
+        if input.Position.X < Header.AbsolutePosition.X + Header.AbsoluteSize.X - 50 then
+            dragToggle = true; dragStart = input.Position; startPos = MainFrame.Position
+        end
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragToggle and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end
+end)
+
+local isActive = false
+local matrixConnection = nil
+local origCollisions = {}
+local totalAnchoredHistory = {}
+local lastScanTime = 0
+local adaptiveScanInterval = 0.3
+
+local Font3x5 = {
+["A"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["B"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1)},
+["C"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(0,2),Vector2.new(1,1),Vector2.new(2,1)},
+["D"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1)},
+["E"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["F"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1)},
+["G"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["H"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["I"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["J"] = {Vector2.new(2,5),Vector2.new(2,4),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["K"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["L"] = {Vector2.new(0,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(0,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["M"] = {Vector2.new(0,1),Vector2.new(0,2),Vector2.new(0,3),Vector2.new(0,4),Vector2.new(0,5),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(2,1)},
+["N"] = {Vector2.new(0,1),Vector2.new(0,2),Vector2.new(0,3),Vector2.new(0,4),Vector2.new(0,5),Vector2.new(1,4),Vector2.new(1,2),Vector2.new(2,1),Vector2.new(2,2),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(2,5)},
+["O"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1)},
+["P"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1)},
+["Q"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,0)},
+["R"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["S"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(1,3),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1)},
+["T"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(1,1)},
+["U"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["V"] = {Vector2.new(0,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1)},
+["W"] = {Vector2.new(-2,5),Vector2.new(-2,4),Vector2.new(-2,3),Vector2.new(-2,2),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(0,3),Vector2.new(0,2),Vector2.new(-1,1),Vector2.new(1,1)},
+["X"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(2,1)},
+["Y"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(1,1)},
+["Z"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["1"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["2"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["3"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["4"] = {Vector2.new(0,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(2,1)},
+["5"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(0,1),Vector2.new(1,1),Vector2.new(2,1)},
+["6"] = {Vector2.new(1,5),Vector2.new(2,5),Vector2.new(0,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1),Vector2.new(2,1)},
+["7"] = {Vector2.new(0,5),Vector2.new(1,5),Vector2.new(2,5),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(1,1)},
+["8"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(1,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1)},
+["9"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(1,3),Vector2.new(2,3),Vector2.new(2,2),Vector2.new(1,1)},
+["0"] = {Vector2.new(1,5),Vector2.new(0,4),Vector2.new(2,4),Vector2.new(0,3),Vector2.new(2,3),Vector2.new(0,2),Vector2.new(2,2),Vector2.new(1,1)},
+["="] = {Vector2.new(0,4),Vector2.new(1,4),Vector2.new(2,4),Vector2.new(0,2),Vector2.new(1,2),Vector2.new(2,2)},
+[")"] = {Vector2.new(0,5),Vector2.new(1,4),Vector2.new(1,3),Vector2.new(1,2),Vector2.new(0,1)},
+["<"] = {Vector2.new(2,5),Vector2.new(1,4),Vector2.new(0,3),Vector2.new(1,2),Vector2.new(2,1)},
+[" "] = {}
+}
+--7
+--"MatrixScannerEngine"
+local function generateTextGrid(text)
+    local combinedGrid = {}
+    text = string.upper(text)
+    local lines = {}
+    for chunk in string.gmatch(text, "[^_]+") do table.insert(lines, chunk) end
+    if #lines == 0 then table.insert(lines, "") end
+    
+    local lineSpacing = _G.MatrixSettings.LineSpacing or 6
+    local totalLines = #lines
+    local density = math.max(1, math.floor(_G.MatrixSettings.BlockDensity or 1))
+    
+    for lineIndex, lineText in ipairs(lines) do
+        local yLineOffset = ((totalLines - 1) / 2 - (lineIndex - 1)) * lineSpacing
+        local rawPoints = {}
+        
+        if lineText == "=)" then
+            rawPoints = {
+                Vector2.new(-2,4), Vector2.new(-2,3), Vector2.new(2,4), Vector2.new(2,3),
+                Vector2.new(-3,1), Vector2.new(3,1), Vector2.new(-2,0), Vector2.new(2,0), 
+                Vector2.new(-1,-1), Vector2.new(0,-1), Vector2.new(1,-1)
+            }
+        elseif lineText == "<3" then
+            rawPoints = {
+                Vector2.new(-2,4), Vector2.new(-1,4), Vector2.new(1,4), Vector2.new(2,4),
+                Vector2.new(-3,3), Vector2.new(0,3), Vector2.new(3,3), 
+                Vector2.new(-3,2), Vector2.new(3,2), 
+                Vector2.new(-2,1), Vector2.new(2,1), 
+                Vector2.new(-1,0), Vector2.new(1,0), 
+                Vector2.new(0,-1)
+            }
+        else
+            local currentLetterOffset = 0
+            local lineTotalWidth = lineText:len() * 4.5
+            local startX = -lineTotalWidth / 2
+            for i = 1, #lineText do
+                local char = lineText:sub(i, i)
+                local matrix = Font3x5[char] or Font3x5[" "]
+                for _, point in ipairs(matrix) do
+                    table.insert(rawPoints, Vector2.new(startX + currentLetterOffset + point.X, point.Y))
+                end
+                currentLetterOffset = currentLetterOffset + ((char == "W") and 5.5 or 4.5)
+            end
+        end
+        
+        for _, pt in ipairs(rawPoints) do
+            if density > 1 then
+                for subX = 0, density - 1 do
+                    for subY = 0, density - 1 do
+                        table.insert(combinedGrid, Vector2.new(pt.X + (subX / density), pt.Y + (subY / density) + yLineOffset))
+                    end
+                end
+            else
+                table.insert(combinedGrid, Vector2.new(pt.X, pt.Y + yLineOffset))
+            end
+        end
+    end
+    
+    if _G.MatrixSettings.MirrorActive then
+        local mirroredGrid = {}
+        for i = #combinedGrid, 1, -1 do
+            local originalPoint = combinedGrid[i]
+            table.insert(mirroredGrid, Vector2.new(-originalPoint.X, originalPoint.Y))
+        end
+        return mirroredGrid
+    end
+    return combinedGrid
+end
+
+local function cleanPart(part)
+    if part then
+        if origCollisions[part] ~= nil then pcall(function() part.CanCollide = origCollisions[part] end) origCollisions[part] = nil end
+        local ap = part:FindFirstChild("MatrixAlignPos")
+        local ao = part:FindFirstChild("MatrixAlignOri")
+        local att = part:FindFirstChild("MatrixAttachment")
+        if ap then pcall(function() ap:Destroy() end) end
+        if ao then pcall(function() ao:Destroy() end) end
+        if att then pcall(function() att:Destroy() end) end
+    end
+end
+
+_G.TextBlocks = {}
+_G.ReserveBlocks = {}
+
+local function startMatrixLogic()
+    matrixConnection = RunService.Heartbeat:Connect(function()
+        local character = localPlayer.Character
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        if not rootPart then return end
+        local myPos = rootPart.Position
+        local currentTime = tick()
+        local currentGrid = generateTextGrid(ContentBox.Text)
+        local textPointsNeeded = #currentGrid
+        
+        local maxTotalBlocksAllowed = math.max(1, math.floor(_G.MatrixSettings.WaitCount))
+        
+        if currentTime - lastScanTime > 0.3 then
+            lastScanTime = currentTime
+            local allCurrentBlocks = {}
+            for _, p in ipairs(_G.TextBlocks) do table.insert(allCurrentBlocks, p) end
+            for _, p in ipairs(_G.ReserveBlocks) do table.insert(allCurrentBlocks, p) end
+            _G.TextBlocks = {}
+            _G.ReserveBlocks = {}
+            
+            for i = #allCurrentBlocks, 1, -1 do
+                local partToCheck = allCurrentBlocks[i]
+                if not partToCheck or not partToCheck.Parent or partToCheck.Anchored or (partToCheck.Position - myPos).Magnitude > _G.MatrixSettings.Distance then
+                    cleanPart(partToCheck)
+                    table.remove(allCurrentBlocks, i)
+                end
+            end
+            if #allCurrentBlocks < maxTotalBlocksAllowed then
+                local foundParts = {}
+                for _, part in ipairs(workspace:GetDescendants()) do
+                    if part:IsA("BasePart") and not part.Anchored and not part:IsDescendantOf(character) and not part.Parent:FindFirstChildOfClass("Humanoid") then
+                        if not table.find(allCurrentBlocks, part) then
+                            local distance = (part.Position - myPos).Magnitude
+                            if distance <= _G.MatrixSettings.Distance then table.insert(foundParts, part) end
+                        end
+                    end
+                end
+                table.sort(foundParts, function(a, b) return (a.Position - myPos).Magnitude < (b.Position - myPos).Magnitude end)
+                for _, part in ipairs(foundParts) do
+                    if #allCurrentBlocks >= maxTotalBlocksAllowed then break end
+                    table.insert(allCurrentBlocks, part)
+                end
+            end
+            while #allCurrentBlocks > maxTotalBlocksAllowed do
+                local extraPart = table.remove(allCurrentBlocks)
+                if extraPart then cleanPart(extraPart) end
+            end
+            for i, part in ipairs(allCurrentBlocks) do
+                if #_G.TextBlocks < textPointsNeeded then table.insert(_G.TextBlocks, part) else table.insert(_G.ReserveBlocks, part) end
+            end
+        end
+--8
+--9
+        local lookDirection = rootPart.CFrame.LookVector
+        local rightDirection = rootPart.CFrame.RightVector
+        local upDirection = rootPart.CFrame.UpVector
+        local scale = _G.MatrixSettings.GridScale
+        
+        for index, part in ipairs(_G.TextBlocks) do
+            if part and part.Parent and index <= textPointsNeeded then
+                local targetOffset2D = currentGrid[index]
+                if origCollisions[part] == nil then origCollisions[part] = part.CanCollide end
+                pcall(function() part.CanCollide = _G.MatrixSettings.TextCollision end)
+                pcall(function() if part:GetNetworkOwner() ~= localPlayer then part:SetNetworkOwner(localPlayer) end end)
+                local attachment = part:FindFirstChild("MatrixAttachment") or Instance.new("Attachment", part)
+                attachment.Name = "MatrixAttachment"
+                local ap = part:FindFirstChild("MatrixAlignPos") or Instance.new("AlignPosition", part)
+                if ap.Name ~= "MatrixAlignPos" then
+                    ap.Name = "MatrixAlignPos"
+                    ap.MaxForce = math.huge
+                    ap.MaxVelocity = 250
+                    ap.Mode = Enum.PositionAlignmentMode.OneAttachment
+                    ap.Attachment0 = attachment
+                end
+                ap.Responsiveness = _G.MatrixSettings.Attraction * 5
+                local ao = part:FindFirstChild("MatrixAlignOri") or Instance.new("AlignOrientation", part)
+                if ao.Name ~= "MatrixAlignOri" then
+                    ao.Name = "MatrixAlignOri"
+                    ao.MaxTorque = math.huge
+                    ao.Responsiveness = 25
+                    ao.Mode = Enum.OrientationAlignmentMode.OneAttachment
+                    ao.Attachment0 = attachment
+                end
+                
+                local forwardOffset = lookDirection * (_G.MatrixSettings.FaceDistance + _G.MatrixSettings.TextZOffset)
+                local horizontalOffset = rightDirection * (targetOffset2D.X * scale)
+                local verticalOffset = upDirection * ((targetOffset2D.Y * scale) + _G.MatrixSettings.TextYOffset)
+                ap.Position = myPos + forwardOffset + horizontalOffset + verticalOffset
+                ao.CFrame = rootPart.CFrame
+                
+                pcall(function()
+                    part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end)
+            end
+        end
+        
+        for reserveIndex, part in ipairs(_G.ReserveBlocks) do
+            if part and part.Parent then
+                if origCollisions[part] == nil then origCollisions[part] = part.CanCollide end
+                pcall(function() part.CanCollide = _G.MatrixSettings.ReserveCollision end)
+                pcall(function() if part:GetNetworkOwner() ~= localPlayer then part:SetNetworkOwner(localPlayer) end end)
+                local attachment = part:FindFirstChild("MatrixAttachment") or Instance.new("Attachment", part)
+                attachment.Name = "MatrixAttachment"
+                local ap = part:FindFirstChild("MatrixAlignPos") or Instance.new("AlignPosition", part)
+                if ap.Name ~= "MatrixAlignPos" then
+                    ap.Name = "MatrixAlignPos"
+                    ap.MaxForce = math.huge
+                    ap.MaxVelocity = 250
+                    ap.Mode = Enum.PositionAlignmentMode.OneAttachment
+                    ap.Attachment0 = attachment
+                end
+                ap.Responsiveness = _G.MatrixSettings.Attraction * 5
+                local ao = part:FindFirstChild("MatrixAlignOri") or Instance.new("AlignOrientation", part)
+                if ao.Name ~= "MatrixAlignOri" then
+                    ao.Name = "MatrixAlignOri"
+                    ao.MaxTorque = math.huge
+                    ao.Responsiveness = 25
+                    ao.Mode = Enum.OrientationAlignmentMode.OneAttachment
+                    ao.Attachment0 = attachment
+                end
+                local maxCols = math.max(1, math.floor(_G.MatrixSettings.ReserveColumns))
+                local maxRows = math.max(1, math.floor(_G.MatrixSettings.ReserveRowsMax))
+                local maxLayers = math.max(1, math.floor(_G.MatrixSettings.ReserveLayersMax))
+                local spacing = _G.MatrixSettings.ReserveSpacing
+                local blocksPerPage = maxCols * maxRows
+                
+                local layerIndex = math.floor((reserveIndex - 1) / blocksPerPage)
+                if layerIndex >= maxLayers then layerIndex = maxLayers - 1 end
+                local pageRemainder = (reserveIndex - 1) % blocksPerPage
+                local colIndex = pageRemainder % maxCols
+                local rowIndex = math.floor(pageRemainder / maxCols)
+                local rowWidthOffset = ((maxCols - 1) * spacing) / 2
+                local xPos = (colIndex * spacing) - rowWidthOffset + _G.MatrixSettings.ReserveXOffset
+                local yPos = _G.MatrixSettings.ReserveHeight + (rowIndex * spacing)
+                local zPos = _G.MatrixSettings.ReserveZOffset - (layerIndex * spacing)
+                
+                local forwardOffset = lookDirection * zPos
+                local horizontalOffset = rightDirection * xPos
+                local verticalOffset = upDirection * yPos
+                ap.Position = myPos + forwardOffset + horizontalOffset + verticalOffset
+                ao.CFrame = rootPart.CFrame
+                
+                pcall(function()
+                    part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end)
+            end
+        end
+    end)
+end
+
+local function deleteForces()
+    if matrixConnection then matrixConnection:Disconnect(); matrixConnection = nil end
+    for _, part in ipairs(_G.TextBlocks) do cleanPart(part) end
+    for _, part in ipairs(_G.ReserveBlocks) do cleanPart(part) end
+    for part, col in pairs(origCollisions) do
+        if part and part.Parent then pcall(function() part.CanCollide = col end) end
+    end
+    _G.TextBlocks = {}
+    _G.ReserveBlocks = {}
+    origCollisions = {}
+end
+
+AnchorBtn.MouseButton1Click:Connect(function()
+    for _, part in ipairs(_G.TextBlocks) do
+        if part and part.Parent then
+            pcall(function()
+                cleanPart(part)
+                part.Anchored = true
+                totalAnchoredHistory[part] = origCollisions[part] or true
+            end)
+        end
+    end
+    for _, part in ipairs(_G.ReserveBlocks) do cleanPart(part) end
+    _G.TextBlocks = {}
+    _G.ReserveBlocks = {}
+    origCollisions = {}
+end)
+
+UnanchorBtn.MouseButton1Click:Connect(function()
+    local character = localPlayer.Character
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    local myPos = rootPart.Position
+    for part, savedCollision in pairs(totalAnchoredHistory) do
+        if part and part.Parent then
+            if (part.Position - myPos).Magnitude <= _G.MatrixSettings.Distance then
+                pcall(function()
+                    part.Anchored = false
+                    part.CanCollide = savedCollision
+                    totalAnchoredHistory[part] = nil
+                end)
+            end
+        end
+    end
+end)
+
+local function safeConnect(signal, callback)
+    if signal then pcall(function() signal:Connect(callback) end) end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == Enum.KeyCode.Insert then MainFrame.Visible = not MainFrame.Visible end
+end)
+
+MirrorBtn.MouseButton1Click:Connect(function()
+    _G.MatrixSettings.MirrorActive = not _G.MatrixSettings.MirrorActive
+    updateLanguageVisuals()
+    saveMatrixConfig()
+end)
+
+-- ИСПРАВЛЕНО: Флаг активности перенесен в глобальную область, убирая застывание кнопки
+ToggleBtn.MouseButton1Click:Connect(function()
+    _G.MatrixSettings.IsActive = not (_G.MatrixSettings.IsActive or false)
+    if _G.MatrixSettings.IsActive then 
+        startMatrixLogic() 
+    else 
+        deleteForces() 
+    end
+    updateLanguageVisuals()
+end)
+
+CloseBtn.MouseButton1Click:Connect(function() deleteForces(); ScreenGui:Destroy() end)
+--9
+
